@@ -1,0 +1,187 @@
+html, body {
+    padding: 0 0;
+    margin: 0 0;
+    background: rgb(22, 22, 22);
+}
+
+a, a:active, a:visited {
+    color: white;
+    text-decoration: none;
+    transition: color 0.5s;
+}
+
+a:hover {
+    color: rgb(128, 128, 128);
+}
+
+ul, li {
+    list-style: none;
+    display: inline;
+    padding: 0;
+}
+
+.navigation_bar {
+    display: flex;
+    background: rgb(15, 15, 15);
+    color: white;
+    justify-content: center;
+    font-family: "SF UI Display";
+    height: 10%;
+}
+
+.navigation_bar ul {
+    display: flex;
+    justify-content: space-between;
+    width: 30%;
+    list-style: none;
+}
+
+.navigation_bar ul li {
+   display: inline;
+}
+
+.current_page {
+    color: rgb(255, 154, 11);
+}
+
+select{
+    border-radius: 8px;
+    outline: none;
+    width: 100%;
+    height: 22px;
+}
+
+input {
+    border-radius: 8px;
+    outline: none;
+    border: none;
+    width: 100%;
+    height: 18px;
+    font-size: 16px;
+}
+
+#id_time_interval_start, #id_time_interval_end {
+    width: 98px;
+}
+
+.errorlist li {
+    list-style-type: none;
+    margin-left: -40px;
+    color: #ab5c5c;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    background: rgb(22, 22, 22);
+    width: 100%;
+    height: auto;
+    color: white;
+    font-family: "SF UI Display";
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.main_menu {
+    margin-top: 100px;
+    display: block;
+    width: 200px;
+}
+
+.plot_button {
+    margin-top: 30px;
+    background: rgb(64, 64, 64);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    width: 100%;
+    height: 30px;
+    cursor: pointer;
+    transition: background 0.7s;
+}
+
+.plot_button:hover {
+    background: rgb(0, 0, 0);
+}
+
+.button {
+    background: rgb(64, 64, 64);
+    border-radius: 15px;
+    height: 40px;
+    width: 100px;
+    display: flex;
+    font-size: 10px;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    margin-top: 20px;
+    transition: background 0.7s;
+}
+
+.button:hover {
+    background: rgb(0, 0, 0);
+}
+
+.list_data {
+    display: block;
+}
+
+.percent_table {
+    margin-top: 20px;
+    border: 1px solid white;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.percent_table tr, td {
+    padding: 3px;
+    border: 1px solid white;
+}
+
+.good {
+    color: rgb(16, 120, 0);
+}
+
+.normal {
+    color: rgb(171, 136, 0);
+}
+
+.bad {
+    color: rgb(135, 0, 0);
+}
+
+.analytics {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.horizontal_menu {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#sort {
+    cursor: pointer;
+    color: white;
+    transition: color 0.5s;
+}
+
+#sort:hover {
+    color: rgb(128, 128, 128);
+}
+
+.sub_menu {
+    display: flex;
+    flex-direction: column;
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(0, 20px);
+    transition: 0.3s;
+}

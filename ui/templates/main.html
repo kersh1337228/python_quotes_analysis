@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="main_menu">
+        <form method="post" action="{% url 'main' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-error">{{ form.non_field_errors }}</div>
+
+            <h4><label class="form-label" for="{{ form.share_name.id_for_label }}">
+                {{ form.share_name.label }}:</label>
+            </h4>
+            {{ form.share_name }}
+            <div class="form-error">{{ form.share_name.errors }}</div>
+
+            <h4><label class="form-label" for="{{ form.time_interval_start.id_for_label }}">
+                {{ form.time_interval_start.label }}:</label>
+            </h4>
+            <ul>
+                <li>{{ form.time_interval_start }}</li>
+                <li>{{ form.time_interval_end }}</li>
+            </ul>
+            <div class="form-error">{{ form.time_interval_start.errors }}</div>
+            <div class="form-error">{{ form.time_interval_end.errors }}</div>
+
+            <h4><label class="form-label" for="{{ form.strategy_name.id_for_label }}">
+                {{ form.strategy_name.label }}:</label>
+            </h4>
+            {{ form.strategy_name }}
+            <div class="form-error">{{ form.strategy_name.errors }}</div>
+            <button class="plot_button" type="submit">Analyze</button>
+        </form>
+    </div>
+{% endblock %}

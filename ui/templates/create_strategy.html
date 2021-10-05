@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <form method="post" action="{% url 'create_strategy' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {% for field in form %}
+            <h4><label class="form-label" for="{{ field.id_for_label }}">
+                {{ field.label }}:</label>
+            </h4>
+            {{ field }}
+            <div class="form-error">{{ field.errors }}</div>
+        {% endfor %}
+        <button class="plot_button" type="submit">Create</button>
+    </form>
+{% endblock %}

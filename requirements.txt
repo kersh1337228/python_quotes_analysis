@@ -1,0 +1,5 @@
+Django
+Pillow
+requests
+numpy
+matplotlib

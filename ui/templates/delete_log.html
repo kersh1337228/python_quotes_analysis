@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ log.pk }}{% endblock %}
+
+{% block content %}
+    <h2>Are you sure you want to delete log number {{ log.pk }}?</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button class="plot_button" type="submit">Delete</button>
+    </form>
+{% endblock %}

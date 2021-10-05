@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <br>
+    <div class="list_data">
+        {% if logs %}
+            {% for log in logs %}
+                <ul>
+                    <li><h3>Share name: {{ log.share }}</h3></li>
+                    <li><h4>Strategy name: {{ log.strategy.name }}</h4></li>
+                    <li><h4>ID: {{ log.pk }}</h4></li>
+                </ul>
+                <img src="{{ log.plot.url }}" alt="">
+                <h3>From {{ log.time_interval_start }} to {{ log.time_interval_end }}</h3>
+                <table class="percent_table">
+                    <tr>
+                        <td>Share change for period</td>
+                        <td>{{ log.share_delta }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Balance change for period</td>
+                        <td>{{ log.balance_delta }}%</td>
+                    </tr>
+                </table>
+                <h3><a href="{% url 'delete_log' log.pk %}">Delete</a></h3>
+                <br><br>
+            {% endfor %}
+        {% else %}
+            <h3>No logs yet</h3>
+        {% endif %}
+    </div>
+{% endblock %}

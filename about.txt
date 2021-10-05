@@ -1,0 +1,7 @@
+The project is absolutely local. 
+
+To start print> '(py/python) manage.py runserver' in your terminal,
+then go to the suggested ip-adress (127.0.0.1:8000 by-default).
+
+Do not forget that DEBUG can be set True in 'settings.py',
+so error monitoring by Django will be on.

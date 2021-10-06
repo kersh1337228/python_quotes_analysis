@@ -11,14 +11,14 @@
             <h3>{{ share_name }}</h3>
             <img class="plot" src="{% static 'plots/plot.png' %}" alt="">
             <h3>From {{ time_interval_start }} to {{ time_interval_end }}</h3>
-            <table class="percent_table" frame="">
+            <table class="percent_table">
                 <tr>
                     <td>Share cost change</td>
                     <td>Balance change</td>
                 </tr>
                 <tr>
-                    <td>{{ share_delta }}%</td>
-                    <td>{{ balance_delta }}%</td>
+                    <td>{{ share_delta_money }} ({{ share_delta_percent }}%)</td>
+                    <td>{{ balance_delta_money }} ({{ balance_delta_percent }}%)</td>
                 </tr>
             </table>
             <a href="{% url 'main' %}"><div class="button"><h2>Return</h2></div></a>

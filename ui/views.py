@@ -1,6 +1,5 @@
 from django.core.files import File
-from django.core.files.images import ImageFile
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, CreateView, DetailView, ListView, DeleteView
 
@@ -131,23 +130,27 @@ def plot_view(request):
     global main_result
     context = {
         'title': 'Plot',
-        'share_delta': round(main_result['share_delta'] * 100, 2),
-        'balance_delta': round(main_result['balance_delta'] * 100, 2),
+        'share_delta_percent': round(main_result['share_delta']['share_delta_percent'] * 100, 2),
+        'share_delta_money': main_result['share_delta']['share_delta_money'],
+        'balance_delta_percent': round(main_result['balance_delta']['balance_delta_percent'] * 100, 2),
+        'balance_delta_money': main_result['balance_delta']['balance_delta_money'],
         'time_interval_start': main_result['time_interval_start'],
         'time_interval_end': main_result['time_interval_end'],
         'share_name': main_result['share_name']
     }
-    if context['share_delta'] == 0 and context['balance_delta'] == 0:
+    if context['share_delta_percent'] == 0 and context['balance_delta_percent'] == 0:
         context['no_data'] = True
         return render(request, 'plot.html', context)
     '''Creating new log connected to a certain strategy'''
     log = Log.objects.create(
-        share_delta=context['share_delta'],
-        balance_delta=context['balance_delta'],
+        share_delta_percent=context['share_delta_percent'],
+        share_delta_money=context['share_delta_money'],
+        balance_delta_percent=context['balance_delta_percent'],
+        balance_delta_money=context['balance_delta_money'],
         strategy=Strategy.objects.get(name=main_result['strategy_name']),
-        share=main_result['share_name'],
-        time_interval_start=main_result['time_interval_start'],
-        time_interval_end=main_result['time_interval_end'],
+        share=context['share_name'],
+        time_interval_start=context['time_interval_start'],
+        time_interval_end=context['time_interval_end'],
     )
     log.plot.save('plot.png', File(open('ui/static/plots/plot.png', 'rb')), save=True)
     log.save()

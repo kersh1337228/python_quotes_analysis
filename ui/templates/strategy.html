@@ -71,11 +71,11 @@
                     <table class="percent_table">
                         <tr>
                             <td>Share change for period</td>
-                            <td>{{ log.share_delta }}%</td>
+                            <td>{{ log.share_delta_money }} ({{ log.share_delta_percent }}%)</td>
                         </tr>
                         <tr>
                             <td>Balance change for period</td>
-                            <td>{{ log.balance_delta }}%</td>
+                            <td>{{ log.balance_delta_money }} ({{ log.balance_delta_percent }}%)</td>
                         </tr>
                     </table>
                 {% endfor %}

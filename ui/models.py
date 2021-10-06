@@ -94,8 +94,10 @@ created after pushing the analyze button and
 stores the data of the analysis'''
 class Log(Model):
     plot = ImageField(upload_to='plots/%Y/%m/%d/%H/%M/%S')
-    share_delta = FloatField()
-    balance_delta = FloatField()
+    share_delta_percent = FloatField(null=True)
+    share_delta_money = FloatField(null=True)
+    balance_delta_percent = FloatField(null=True)
+    balance_delta_money = FloatField(null=True)
     strategy = ForeignKey('Strategy', on_delete=CASCADE)
     share = CharField(max_length=255)
     time_interval_start = DateField()
@@ -103,7 +105,7 @@ class Log(Model):
 
     '''Says whether the analytics result is bad(-), normal(0) or good(+)'''
     def get_result(self):
-        result = self.balance_delta - self.share_delta
+        result = self.balance_delta_percent - self.share_delta_percent
         if result < 0:
             return 'bad'
         elif result == 0:

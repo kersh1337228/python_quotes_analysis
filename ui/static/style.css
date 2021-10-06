@@ -22,22 +22,26 @@ ul, li {
 
 .navigation_bar {
     display: flex;
-    background: rgb(15, 15, 15);
+    position: fixed;
+    background: rgba(15, 15, 15, 0.7);
     color: white;
     justify-content: center;
     font-family: "SF UI Display";
-    height: 10%;
+    backdrop-filter: blur(7px);
+    width: 100%;
+    height: 45px;
 }
 
 .navigation_bar ul {
     display: flex;
+    z-index: 10;
     justify-content: space-between;
     width: 30%;
     list-style: none;
 }
 
 .navigation_bar ul li {
-   display: inline;
+    display: inline;
 }
 
 .current_page {
@@ -127,6 +131,7 @@ input {
 
 .list_data {
     display: block;
+    margin-top: 30px;
 }
 
 .percent_table {
@@ -158,6 +163,7 @@ input {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-top: 40px;
 }
 
 .horizontal_menu {
@@ -184,4 +190,12 @@ input {
     opacity: 0;
     transform: translate(0, 20px);
     transition: 0.3s;
+}
+
+.warning {
+    margin-top: 70px;
+}
+
+.create_form {
+    margin-top: 70px;
 }

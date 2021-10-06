@@ -1,9 +1,13 @@
 import csv
 import datetime
 import re
+
+import matplotlib.dates
 import numpy
 import matplotlib.pyplot as plt
-import matplotlib.dates as dat
+import pandas
+from mpl_finance import candlestick_ohlc
+
 
 '''Briefcase class, storing the strategy,
 money amount, shares amount and shares cost,
@@ -17,7 +21,10 @@ class Briefcase:
             self.cost = cost
             self.avg_cost = avg_cost
 
-        def total_savings(self):
+        def liquidation_savings(self):
+            return self.money + self.shares_amount * self.cost
+
+        def average_savings(self):
             return self.money + self.shares_amount * self.avg_cost
 
         def __str__(self):
@@ -77,7 +84,7 @@ class Briefcase:
 '''The function to get the list of dates
 to show this list in select-box on web-page'''
 def get_dates():
-    points = get_points('amd')
+    points = get_points('gazprom')
     start = [(i['date'], i['date'].strftime('%d/%m/%Y')) for i in points]
     end = [(i['date'], i['date'].strftime('%d/%m/%Y')) for i in points][3:]
     return {'start': start, 'end': end}
@@ -122,6 +129,7 @@ def get_points(filename):
                 'high': float(row[3]),
                 'low': float(row[4]),
                 'close': float(row[5]),
+                'volume': int(row[6]),
             })
         file.close()
     return points
@@ -149,6 +157,8 @@ cause all shares date fields are different'''
 def get_date_indexes(start, end, dates):
     start_index = 0
     end_index = 0
+    print(start)
+    print(end)
     for i in range(len(dates)):
         if start >= dates[i]:
             start_index = i
@@ -160,20 +170,24 @@ def get_date_indexes(start, end, dates):
 
 '''Building the plot, showing the total savings amount and
 shares average_cost, depending on the time point'''
-def plot_builder(time, cost, money):
+def plot_builder(time, cost, points, money):
     # Creating the first plot
     cost_plot = plt.subplot(2, 1, 1)
-    plt.plot(time, cost, '-', label='Share cost')
+    cost_plot.set_title('Share cost', color='w')
+    dats = pandas.to_datetime(time).to_series().apply(matplotlib.dates.date2num)
+    candlestick_ohlc(cost_plot, zip(dats, [point['open'] for point in points],
+                                    [point['high'] for point in points],
+                                    [point['low'] for point in points],
+                                    [point['close'] for point in points]),
+                     width=1, colorup='g', colordown='r'
+                     )
 
     # Setting x-axis data as formatted date
     plt.gca().xaxis.set_visible(False)
-    # plt.gca().xaxis.set_major_formatter(dat.DateFormatter('%d/%m/%Y'))
-    # plt.gca().xaxis.set_major_locator(dat.DayLocator())
-    # plt.gcf().autofmt_xdate()
 
     # Setting axis labels
     plt.xlabel('Date')
-    plt.ylabel('Share cost')
+    plt.ylabel('RUB')
 
     # Setting plot dark color-scheme
     plt.gca().set_facecolor((0.086, 0.086, 0.086))
@@ -186,16 +200,12 @@ def plot_builder(time, cost, money):
     cost_plot.tick_params(axis='x', colors='w')
     cost_plot.tick_params(axis='y', colors='w')
 
-    plt.legend()
-
     # Creating the second plot
     money_plot = plt.subplot(2, 1, 2)
-    plt.plot(time, money, '-', color='r', label='Balance')
+    plt.plot(time, money, '-', color='r')
+    money_plot.set_title('Balance', color='w')
 
     plt.gca().xaxis.set_visible(False)
-    # plt.gca().xaxis.set_major_formatter(dat.DateFormatter('%d.%m/%Y'))
-    # plt.gca().xaxis.set_major_locator(dat.DayLocator())
-    # plt.gcf().autofmt_xdate()
 
     plt.xlabel('Time interval')
     plt.ylabel('RUB')
@@ -214,7 +224,6 @@ def plot_builder(time, cost, money):
     fig.patch.set_facecolor((0.086, 0.086, 0.086))
 
     # Saving the obtained plot
-    plt.legend()
     plt.savefig('ui/static/plots/plot.png')
     plt.close()
 
@@ -238,16 +247,24 @@ def main(raw_filename, time_interval, raw_strategy):
     time = numpy.array(dates[3:][start_index:end_index + 1])
     logs = logs[start_index:end_index + 1]
     cost = numpy.array([i.cost for i in logs])
-    money = numpy.array([i.total_savings() for i in logs])
+    money = numpy.array([i.liquidation_savings() for i in logs])
 
-    plot_builder(time, cost, money)
+    plot_builder(time, cost, points, money)
 
-    share_delta = (logs[-1].cost / logs[0].cost - 1)
-    balance_delta = (logs[-1].total_savings() / logs[0].total_savings() - 1)
+    share_delta_percent = logs[-1].cost / logs[0].cost - 1
+    share_delta_money = round(logs[-1].cost - logs[0].cost, 2)
+    balance_delta_percent = (logs[-1].liquidation_savings() / logs[0].liquidation_savings() - 1)
+    balance_delta_money = round(logs[-1].liquidation_savings() - logs[0].liquidation_savings(), 2)
 
     return {
-        'share_delta': share_delta,
-        'balance_delta': balance_delta,
+        'share_delta': {
+            'share_delta_percent': share_delta_percent,
+            'share_delta_money': share_delta_money,
+        },
+        'balance_delta': {
+            'balance_delta_percent': balance_delta_percent,
+            'balance_delta_money': balance_delta_money,
+        },
         'strategy_name': raw_strategy['name'],
         'share_name': filename.split('/')[-1][:-4].capitalize(),
         'time_interval_start': dates[0],

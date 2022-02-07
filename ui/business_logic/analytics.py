@@ -1,13 +1,11 @@
 import csv
 import datetime
 import re
-
 import matplotlib.dates
 import numpy
 import matplotlib.pyplot as plt
 import pandas
 from mpl_finance import candlestick_ohlc
-
 
 '''Briefcase class, storing the strategy,
 money amount, shares amount and shares cost,

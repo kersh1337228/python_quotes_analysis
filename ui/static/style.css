@@ -48,20 +48,70 @@ ul, li {
     color: rgb(255, 154, 11);
 }
 
-select{
-    border-radius: 8px;
-    outline: none;
-    width: 100%;
-    height: 22px;
+/*select{*/
+/*    border-radius: 0 0 8px 8px;*/
+/*    padding: 5px 5px 5px 5px;*/
+/*    outline: none;*/
+/*    border: none;*/
+/*    width: 410px;*/
+/*    height: 40px;*/
+/*    background: rgb(50, 50, 50);*/
+/*    color: white;*/
+/*}*/
+
+div {
+    box-sizing: border-box;
 }
 
 input {
-    border-radius: 8px;
+    box-sizing: border-box;
+    border-radius: 11px;
+    padding: 5px 5px 5px 5px;
     outline: none;
     border: none;
     width: 100%;
-    height: 18px;
+    height: 40px;
     font-size: 16px;
+    background: rgb(50, 50, 50);
+    color: white;
+}
+
+option {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/*Custom crisp scrollbar*/
+::-webkit-scrollbar {
+    background: transparent;
+    width: 0.7em;
+    position: absolute;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+	position: absolute;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 50px;
+	background: rgb(170, 170, 170);
+    transition: background 0.7s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(100, 100, 100);
+}
+
+.share_name {
+    border-radius: 0 0 8px 8px;
+    padding: 5px 5px 5px 5px;
+    outline: none;
+    border: none;
+    width: 100%;
+    height: auto;
+    background: rgb(50, 50, 50);
+    color: white;
 }
 
 #id_time_interval_start, #id_time_interval_end {
@@ -89,9 +139,10 @@ input {
 }
 
 .main_menu {
+    text-align: center;
     margin-top: 100px;
     display: block;
-    width: 200px;
+    width: 400px;
 }
 
 .plot_button {

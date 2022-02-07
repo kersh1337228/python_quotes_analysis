@@ -1,5 +1,4 @@
 from django.forms import *
-
 from .business_logic.utils import get_shares
 from .business_logic.analytics import *
 from .models import Strategy
@@ -8,19 +7,35 @@ from .models import Strategy
 '''User interface form, allowing to choose the share name, 
 beginning and ending date, strategy to use'''
 class UserInterface(Form):
-    share_name = ChoiceField(label='Share Name', choices=get_shares(), error_messages={
-                                 'required': ('You have to choose the share name'),
-                             })
-    time_interval_start = ChoiceField(label='Time Interval', choices=get_dates()['start'], error_messages={
-                                 'required': ('You have to choose the first date of your time interval'),
-                             })
-    time_interval_end = ChoiceField(label='Time Interval', choices=get_dates()['end'], error_messages={
-                                 'required': ('You have to choose the last date of your time interval'),
-                             })
-    strategy_name = ModelChoiceField(queryset=Strategy.objects.all(), label='Strategy', error_messages={
-                                 'required': ('You have to choose the strategy'),
-                             }, empty_label='(Choose the strategy)')
-
+    share_name = CharField(
+        label='Share Name',
+        max_length=255,
+        error_messages={
+            'required': ('You have to choose the share name'),
+        },
+        widget=TextInput(attrs={'placeholder': 'Enter the share name'})
+    )
+    time_interval_start = ChoiceField(
+        label='Time Interval',
+        choices=get_dates()['start'],
+        error_messages={
+            'required': ('You have to choose the first date of your time interval'),
+        }
+    )
+    time_interval_end = ChoiceField(
+        label='Time Interval',
+        choices=get_dates()['end'],
+        error_messages={
+            'required': ('You have to choose the last date of your time interval'),
+        }
+    )
+    strategy_name = ModelChoiceField(
+        queryset=Strategy.objects.all(),
+        label='Strategy',
+        error_messages={
+            'required': ('You have to choose the strategy'),
+        }, empty_label='(Choose the strategy)'
+    )
     '''Custom validator for time interval'''
     def clean(self):
         cleaned_data = super().clean()

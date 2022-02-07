@@ -2,10 +2,53 @@ from django.core.files import File
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, CreateView, DetailView, ListView, DeleteView
-
+from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.response import Response
 from .business_logic.analytics import main
+from .business_logic.data_parser import quote_name_search
 from .forms import *
 from .models import *
+from .utils import parse_json
+
+
+class UIAPIView(
+    CreateAPIView,
+    RetrieveUpdateDestroyAPIView
+):
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            data = parse_json(request.query_params.copy())
+            if data.get('step') == 'id_share_name':
+                return Response(
+                    {'results':
+                         [result[0].strip() for result in quote_name_search(data.get('name'))]
+                         if data.get('name') else []},
+                    status=200
+                )
+            elif data.get('step') == '':
+                pass
+            elif data.get('step') == '':
+                pass
+            else:
+                pass
+        else:
+            return render(
+                request, 'main.html',
+                {'title': 'Analytics',
+                 'form': UserInterface}
+            )
+
+    def post(self, request, *args, **kwargs):
+        pass
+
+    def put(self, request, *args, **kwargs):
+        pass
+
+    def patch(self, request, *args, **kwargs):
+        pass
+
+    def delete(self, request, *args, **kwargs):
+        pass
 
 
 '''User interface view, calling the 
@@ -13,7 +56,6 @@ analytics function if form is valid'''
 class UIView(FormView):
     template_name = 'main.html'
     form_class = UserInterface
-
     main_result = {}
 
     def get_context_data(self, **kwargs):
@@ -29,8 +71,7 @@ class UIView(FormView):
             'start': form_data['time_interval_start'],
             'end': form_data['time_interval_end'],
         }
-        global main_result
-        main_result = main(form_data['share_name'], time_interval,
+        self.main_result = main(form_data['share_name'], time_interval,
                            Strategy.objects.get(pk=int(form_data['strategy_name'])).get_params())
         return super(UIView, self).form_valid(form)
 

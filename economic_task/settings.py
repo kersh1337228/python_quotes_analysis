@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     # Project apps
     'ui.apps.UiConfig',
+    'quotes.apps.QuotesConfig'
 ]
 
 MIDDLEWARE = [

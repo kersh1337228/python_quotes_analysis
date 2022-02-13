@@ -103,9 +103,9 @@ def string_to_dict(string):
 
 '''Formatted .csv file name getter'''
 def get_filename(filename):
-    if re.match(r'^(ui/static/csv/)?([\w]+)(\.csv)?$', filename):
-        filename = re.findall(r'^(ui/static/csv/)?([\w]+)(\.csv)?$', filename)[0][1]
-        return 'ui/static/csv/' + filename + '.csv'
+    if re.match(r'^(static/csv/)?([\w]+)(\.csv)?$', filename):
+        filename = re.findall(r'^(static/csv/)?([\w]+)(\.csv)?$', filename)[0][1]
+        return 'static/csv/' + filename + '.csv'
     else:
         print('Wrong csv filename')
         exit()

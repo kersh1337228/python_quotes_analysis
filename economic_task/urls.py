@@ -15,13 +15,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls import url
 from ui.views import method404
+from django.conf.urls.static import static
+from economic_task import settings
 
 urlpatterns = [
+    # default urls
     path('admin/', admin.site.urls),
+    # framework urls
+    path('api-auth/', include('rest_framework.urls')),
+    # applications urls
     path('', include('ui.urls')),
-    url(r'', include('ui.urls')),
+    path('quotes/', include('quotes.urls'))
 ]
+
+if settings.DEBUG: # Appending urls on local machine
+    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = method404

@@ -2,5 +2,5 @@
 /.idea/
 /__pycache__/
 /media/
-/ui/static/plots/
-/ui/static/SanFranciscoFont/
+/static/plots/
+/static/SanFranciscoFont/

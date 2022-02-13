@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load quotes_tags %}
+
+{% block title %}Portfolios{% endblock %}
+
+{% block content %}
+    <div class="portfolios">
+        <div class="portfolio_add">
+            <div class="button_div">Update data</div>
+        </div>
+        <div class="portfolios_list">
+            {% if quotes %}
+                <div class="quotes_list_header">
+                    <ul>
+                        <li class="quotes_symbol">Symbol</li>
+                        <li class="quotes_name">Name</li>
+                        <li class="quotes_price">Price $</li>
+                        <li class="quotes_change">Change $</li>
+                        <li class="quotes_changep">Change %</li>
+                        <li class="quotes_volume">Volume</li>
+                    </ul>
+                </div>
+                {% for quote in quotes %}
+                    <div class="quotes_details" id="{{ quote.slug }}">
+                        <ul>
+                            <li class="quotes_symbol">{{ quote.symbol }}</li>
+                            <li class="quotes_name">{{ quote.name }}</li>
+                            <li class="quotes_price">{{ quote.price }}</li>
+                            <li class="quotes_change">{{ quote.change }}</li>
+                            <li class="quotes_changep">{{ quote.change_percent }}</li>
+                            <li class="quotes_volume">{{ quote.volume }}</li>
+                        </ul>
+                    </div>
+                {% endfor %}
+            {% else %}
+                No quotes. Update the data.
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -2,4 +2,33 @@
 
 {% block title %}{{ portfolio.name }}{% endblock %}
 
-{% block content %}{% endblock %}
+{% block content %}
+    <span class="config_button" id="portfolio_config">Configure</span>
+    <span class="config_button" id="portfolio_delete">Delete</span>
+    <div class="portfolio">
+        <h1 class="portfolio_name">{{ portfolio.name }}</h1>
+        <div class="portfolio_created">Created: {{ portfolio.created|date:"d.M.Y" }}</div>
+        <div class="portfolio_updated">Last updated: {{ portfolio.last_updated|date:"d.M.Y" }}</div>
+        <div class="portfolio_balance">Balance: {{ portfolio.balance }} $</div>
+        <div class="portfolio_shares">
+            <h2>Shares</h2>
+            {% if portfolio.shares|length %}
+                {% for share in portfolio.shares.all %}
+                    <div>Share</div>
+                {% endfor %}
+            {% else %}
+                No shares yet
+            {% endif %}
+        </div>
+        <div class="portfolio_logs">
+            <h2>Logs</h2>
+            {% if portfolio.logs|length %}
+                {% for log in portfolio.logs.all %}
+                    <div>Log</div>
+                {% endfor %}
+            {% else %}
+                No logs yet
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

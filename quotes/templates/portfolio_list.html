@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load quotes_tags %}
+
+{% block title %}Portfolios{% endblock %}
+
+{% block content %}
+    <div class="portfolios">
+        <div class="portfolio_add">
+            <div class="button_div"><div>Add Portfolio</div><div>+</div></div>
+            <div class="form" style="display: none;">{% form_tag form=form %}</div>
+        </div>
+        <div class="portfolios_list">
+            {% if portfolios %}
+                <div class="portfolio_list_header">
+                    <ul>
+                        <li class="portfolios_name">Name</li>
+                        <li class="portfolios_balance">Balance</li>
+                        <li class="portfolios_shares">Shares</li>
+                        <li class="portfolios_logs">Logs</li>
+                        <li class="portfolios_created">Created</li>
+                        <li class="portfolios_updated">Last updated</li>
+                    </ul>
+                </div>
+                {% for portfolio in portfolios %}
+                    <a href="{% url 'portfolio_detail' slug=portfolio.slug %}">
+                        <div class="portfolio_details">
+                            <ul>
+                                <li class="portfolios_name">{{ portfolio.name }}</li>
+                                <li class="portfolios_balance">{{ portfolio.balance }}</li>
+                                <li class="portfolios_shares">{{ portfolio.shares.all|length }}</li>
+                                <li class="portfolios_logs">{{ portfolio.logs.all|length }}</li>
+                                <li class="portfolios_created">{{ portfolio.created|date:"d.M.Y" }}</li>
+                                <li class="portfolios_updated">{{ portfolio.last_updated|date:"d.M.Y" }}</li>
+                            </ul>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                No portfolios yet
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

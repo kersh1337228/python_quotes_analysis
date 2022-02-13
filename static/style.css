@@ -1,0 +1,447 @@
+html, body {
+    padding: 0 0;
+    margin: 0 0;
+    height: 100%;
+    background: rgb(22, 22, 22);
+    font-family: "SF UI Display";
+    color: white;
+}
+
+a, a:active, a:visited {
+    color: white;
+    text-decoration: none;
+    transition: color 0.5s;
+}
+
+a:hover {
+    color: rgb(128, 128, 128);
+}
+
+h1 {
+    padding: 0 0 0 0;
+    margin: 0 0 0 0;
+}
+
+ul {
+    padding: 0;
+}
+
+ul, li {
+    list-style: none;
+    display: inline;
+    /*padding: 0;*/
+}
+
+div {
+    box-sizing: content-box;
+}
+
+.errorlist {
+    padding: 40px;
+}
+
+.navigation_bar {
+    display: flex;
+    position: fixed;
+    background: rgba(15, 15, 15, 0.7);
+    color: white;
+    justify-content: center;
+    backdrop-filter: blur(7px);
+    width: 100%;
+    height: 45px;
+    z-index: 2;
+}
+
+.navigation_bar ul {
+    display: flex;
+    z-index: 10;
+    justify-content: space-between;
+    width: 30%;
+    list-style: none;
+}
+
+.navigation_bar ul li {
+    display: inline;
+}
+
+.content {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    margin-top: 70px;
+
+    width: 100%;
+    height: auto;
+}
+
+input {
+    box-sizing: border-box;
+    border-radius: 11px;
+    padding: 5px 5px 5px 5px;
+    outline: none;
+    border: none;
+    width: 100%;
+    height: 40px;
+    font-size: 16px;
+    background: rgb(50, 50, 50);
+    color: white;
+}
+
+option {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/*Custom crisp scrollbar*/
+::-webkit-scrollbar {
+    background: transparent;
+    width: 0.7em;
+    position: absolute;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+	position: absolute;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 50px;
+	background: rgb(170, 170, 170);
+    transition: background 0.7s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(100, 100, 100);
+}
+
+.portfolios {
+    display: grid;
+    grid-gap: 10px 10px;
+
+    width: 700px;
+    background: rgb(50, 50, 50);
+    padding: 15px 15px 15px 15px;
+    border-radius: 10px;
+}
+
+.portfolio_add {
+    background: rgb(30, 30, 30);
+    padding: 15px 15px 15px 15px;
+    border-radius: 10px;
+}
+
+.portfolios_list {
+    display: grid;
+    background: rgb(30, 30, 30);
+    padding: 15px 15px 15px 15px;
+    border-radius: 10px;
+    row-gap: 15px;
+}
+
+.portfolio_details, .portfolio_list_header {
+    background: rgb(40, 40, 40);
+    padding: 15px 15px 15px 15px;
+    border-radius: 10px;
+    transition: background 0.7s;
+}
+
+.portfolio_list_header {
+    background: rgb(30, 30, 30);
+}
+
+.portfolio_details:hover {
+    background: rgb(20, 20, 20);;
+}
+
+.portfolio_details ul, .portfolio_list_header ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    row-gap: 10px;
+}
+
+.portfolios_name {
+    justify-self: start;
+}
+
+.portfolios_balance, .portfolios_created, .portfolios_updated,
+.portfolios_shares, .portfolios_logs {
+    justify-self: end;
+}
+
+.form form {
+    display: grid;
+    grid-gap: 10px 10px;
+}
+
+.button_div, .submit_button {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background: rgb(30, 30, 30);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.7s;
+}
+
+.button_div:hover, .submit_button:hover {
+    background: rgb(20, 20, 20);
+}
+
+.portfolio {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-gap: 15px 15px;
+    width: 400px;
+}
+
+.portfolio_name {
+    grid-row-start: 1;
+    grid-row-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 1;
+    align-self: center;
+}
+
+.portfolio_balance {
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 2;
+    grid-column-end: 4;
+    justify-self: start;
+    align-self: end;
+}
+
+.portfolio_created {
+    grid-row-start: 1;
+    grid-row-end: 1;
+    grid-column-start: 2;
+    grid-column-end: 3;
+    align-self: end;
+    font-weight: lighter;
+    font-size: 14px;
+}
+
+.portfolio_updated {
+    grid-row-start: 1;
+    grid-row-end: 1;
+    grid-column-start: 3;
+    grid-column-end: 4;
+    align-self: end;
+    text-align: end;
+    justify-self: end;
+    font-weight: lighter;
+    font-size: 14px;
+}
+
+.portfolio_shares {
+    grid-row-start: 3;
+    grid-row-end: 4;
+    grid-column-start: 1;
+    grid-column-end: 4;
+}
+
+.portfolio_logs {
+    grid-row-start: 4;
+    grid-row-end: 5;
+    grid-column-start: 1;
+    grid-column-end: 4;
+}
+
+.config_button {
+    width: 400px;
+    text-align: end;
+    cursor: pointer;
+    transition: color 0.7s;
+}
+
+#portfolio_delete {
+    color: rgb(171, 92, 92);
+    transition: color 0.7s;
+}
+
+#portfolio_delete:hover {
+    color: rgb(250, 92, 92);
+}
+
+.config_button:hover {
+    color: rgb(150, 150, 150);
+}
+
+.quotes_details {
+    cursor: pointer;
+}
+
+.quotes_details, .quotes_list_header {
+    background: rgb(40, 40, 40);
+    padding: 15px 15px 15px 15px;
+    border-radius: 10px;
+    transition: background 0.7s;
+}
+
+.quotes_details:hover {
+    background: rgb(20, 20, 20);
+}
+
+.quotes_details ul, .quotes_list_header ul {
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(6, 1fr);
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    row-gap: 10px;
+}
+
+.quotes_list_header {
+    background: rgb(30, 30, 30);
+}
+
+.quotes_symbol, .quotes_name {
+    justify-self: start;
+}
+.quotes_price, .quotes_change,
+.quotes_changep, .quotes_volume {
+    justify-self: end;
+}
+
+.share_name {
+    border-radius: 0 0 8px 8px;
+    padding: 5px 5px 5px 5px;
+    outline: none;
+    border: none;
+    width: 100%;
+    height: auto;
+    background: rgb(50, 50, 50);
+    color: white;
+}
+
+#id_time_interval_start, #id_time_interval_end {
+    width: 98px;
+}
+
+.errorlist li {
+    list-style-type: none;
+    margin-left: -40px;
+    color: #ab5c5c;
+}
+
+.main_menu {
+    text-align: center;
+    margin-top: 100px;
+    display: block;
+    width: 400px;
+}
+
+.plot_button {
+    margin-top: 30px;
+    background: rgb(64, 64, 64);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    width: 100%;
+    height: 30px;
+    cursor: pointer;
+    transition: background 0.7s;
+}
+
+.plot_button:hover {
+    background: rgb(0, 0, 0);
+}
+
+.button {
+    background: rgb(64, 64, 64);
+    border-radius: 15px;
+    height: 40px;
+    width: 100px;
+    display: flex;
+    font-size: 10px;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    margin-top: 20px;
+    transition: background 0.7s;
+}
+
+.button:hover {
+    background: rgb(0, 0, 0);
+}
+
+.list_data {
+    display: block;
+    margin-top: 30px;
+}
+
+.percent_table {
+    margin-top: 20px;
+    border: 1px solid white;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.percent_table tr, td {
+    padding: 3px;
+    border: 1px solid white;
+}
+
+.good {
+    color: rgb(16, 120, 0);
+}
+
+.normal {
+    color: rgb(171, 136, 0);
+}
+
+.bad {
+    color: rgb(135, 0, 0);
+}
+
+.analytics {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.horizontal_menu {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#sort {
+    cursor: pointer;
+    color: white;
+    transition: color 0.5s;
+}
+
+#sort:hover {
+    color: rgb(128, 128, 128);
+}
+
+.sub_menu {
+    display: flex;
+    flex-direction: column;
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(0, 20px);
+    transition: 0.3s;
+}
+
+.warning {
+    margin-top: 70px;
+}
+
+.create_form {
+    margin-top: 70px;
+}
+
+.current_page {
+    color: rgb(255, 154, 11);
+}

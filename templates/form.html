@@ -1,0 +1,13 @@
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form_error">{{ form.non_field_errors }}</div>
+    {% for field in form %}
+        <div class="form_error">{{ field.errors }}</div>
+        {{ field }}
+    {% endfor %}
+    <div class="submit_button">
+        Submit
+{#        <img src=""#}
+{#         width="22px" height="22px" alt="" class="send_message_icon">#}
+    </div>
+</form>

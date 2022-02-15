@@ -3,25 +3,24 @@ $(document).ready(function () {
     function get_csrf () {
         return document.cookie.match(/csrftoken=([\w]+)[;]?/)[1]
     }
-    // Parsing form selection data on form select
-    $('select').on('change', function () {
-        $.ajax({
-            url: `${window.location.origin}/analysis/form/`,
-            type: 'GET',
-            data: {
-                share_name: $(this).val(),
-                step: $(this).attr('id')
-            },
-            success: function (response) {
-
-            },
-            error: function (response) {
-                alert('error')
-            }
-        })
-    })
-
-    $('#id_share_name').on('input paste', function () {
+    // // Parsing form selection data on form select
+    // $('select').on('change', function () {
+    //     $.ajax({
+    //         url: `${window.location.origin}/analysis/form/`,
+    //         type: 'GET',
+    //         data: {
+    //             share_name: $(this).val(),
+    //             step: $(this).attr('id')
+    //         },
+    //         success: function (response) {
+    //
+    //         },
+    //         error: function (response) {
+    //             alert('error')
+    //         }
+    //     })
+    // })
+    $('.content').on('input paste', '#id_share_name', function () {
         search_input = $(this)
         $.ajax({
             url: `${window.location.origin}/analysis/form/`,
@@ -35,14 +34,14 @@ $(document).ready(function () {
                 search_input.css('border-radius', '11px')
                 if (!response.results.length && search_input.val() !== '') {
                     search_input.css('border-radius', '11px 11px 0 0')
-                    $('.main_menu > form').append('<div class="share_name">No matches</div>')
+                    search_input.after('<div class="share_name">No matches</div>')
                 } else if (response.results.length) {
                     search_input.css('border-radius', '11px 11px 0 0')
-                    $('.main_menu > form').append('<select class="share_name"></select>')
-                    $('.main_menu > form')
+                    search_input.after('<select class="share_name"></select>')
                     response.results.forEach(function (element, index) {
-                        console.log(element)
-                        $('.share_name').append(`<option value="${element.toLowerCase()}">${element}</option>`)
+                        $('.share_name').append(
+                            `<option value="${element.symbol}">${element.symbol} | ${element.name}</option>`
+                        )
                     })
                 }
             },
@@ -203,38 +202,110 @@ $(document).ready(function () {
     })
     // Quote click
     $('.content').on('click', '.quotes_details', function() {
-        const slug = $(this).attr('id')
+        const quote = $(this)
         $.ajax({
-                url: `${window.location.origin}/quotes/quotes/detail/${slug}`,
+                url: `${window.location.origin}/quotes/detail/${quote.attr('id')}`,
                 type: 'GET',
-                headers: {'X-CSRFTOKEN': get_csrf()},
-                data: {},
+                data: {
+                    symbol: quote.find('ul .quotes_symbol').text(),
+                    name: quote.find('ul .quotes_name').text()
+                },
                 success: function (response) {
-                    // window.location.href = `${window.location.origin}/quotes/portfolio/list`
+                    window.location.href = `${window.location.origin}/quotes/quotes/detail/${quote.attr('id')}`
                 },
                 error: function (response) {
                     alert('Error')
                 }
         })
     })
-    for (i in $('.quotes_change')) {
-        let change = $($('.quotes_change')[i])
-        if (change.text().startsWith('-')) {
-            change.css('color', 'red')
-        } else if (change.text().startsWith('+')) {
-            change.css('color', 'green')
-        } else if (change.text() !== 'Change $') {
-            change.css('color', 'yellow')
+    try {
+        for (i in $('.quotes_change')) {
+            let change = $($('.quotes_change')[i])
+            if (change.text().startsWith('-')) {
+                change.css('color', 'rgb(171, 92, 92)')
+            } else if (change.text().startsWith('+')) {
+                change.css('color', 'rgb(92, 171, 50)')
+            } else if (change.text() !== 'Change $') {
+                change.css('color', 'rgb(219,168,0)')
+            }
         }
-    }
-    for (i in $('.quotes_changep')) {
-        let change = $($('.quotes_changep')[i])
-        if (change.text().startsWith('-')) {
-            change.css('color', 'red')
-        } else if (change.text().startsWith('+')) {
-            change.css('color', 'green')
-        } else if (change.text() !== 'Change %') {
-            change.css('color', 'yellow')
+        for (i in $('.quotes_changep')) {
+            let change = $($('.quotes_changep')[i])
+            if (change.text().startsWith('-')) {
+                change.css('color', 'rgb(171, 92, 92)')
+            } else if (change.text().startsWith('+')) {
+                change.css('color', 'rgb(92, 171, 50)')
+            } else if (change.text() !== 'Change %') {
+                change.css('color', 'rgb(219,168,0)')
+            }
         }
-    }
+    } catch (error) {}
+    // Quotes list search
+    $('.content').on('input paste', '#quotes_search', function () {
+        search_input = $(this)
+        $.ajax({
+            url: `${window.location.origin}/quotes/list/search/`,
+            type: 'GET',
+            data: {
+                search: search_input.val()
+            },
+            success: function (response) {
+                $('.share_name').remove()
+                search_input.css('border-radius', '11px')
+                if (!response.results.length && search_input.val() !== '') {
+                    search_input.css('border-radius', '11px 11px 0 0')
+                    search_input.after('<div class="share_name">No matches</div>')
+                } else if (response.results.length) {
+                    search_input.css('border-radius', '11px 11px 0 0')
+                    search_input.after('<select class="share_name"></select>')
+                    response.results.forEach(function (element, index) {
+                        $('.share_name').append(
+                            `<option value="${element.symbol}">${element.symbol} | ${element.name}</option>`
+                        )
+                    })
+                }
+            },
+            error: function (response) {
+                alert('error')
+            }
+        })
+    })
+    // Show share search form
+    $('.content').on('click', '#portfolio_add_shares', function () {
+        if (!$('#id_share_name').length) {
+           $(this).after(`<input type="text" name="share_name" placeholder="Enter the share name" 
+                maxlength="255" required="" id="id_share_name">
+                <div id="portfolio_confirm_add">Add</div>
+            `)
+        } else {
+            $('#id_share_name').remove()
+            $('#portfolio_confirm_add').remove()
+            $('.share_name').remove()
+        }
+    })
+    $('.content').on('click', '#portfolio_confirm_add', function () {
+        $.ajax({
+                url: `${window.location.origin}/quotes/portfolio/share/`,
+                type: 'PUT',
+                headers: {'X-CSRFTOKEN': get_csrf()},
+                data: {
+                    symbol: $('.share_name option:selected').val(),
+                    slug: window.location.href.match(/\/quotes\/portfolio\/detail\/([\w]+)/)[1],
+                    type: 'add'
+                },
+                success: function (response) {
+                    $('span:contains("No shares yet")').remove()
+                    $('#id_share_name').remove()
+                    $('#portfolio_confirm_add').remove()
+                    $('.share_name').remove()
+                    $('#portfolio_add_shares').after(
+                        `<div>${response.share.symbol} | ${response.share.name}</div>`
+                    )
+                },
+                error: function (response) {
+
+                }
+            })
+    })
+
 })

@@ -44,6 +44,7 @@ from bs4 import BeautifulSoup
 #                 print('Wrong name')
 #                 continue
 #         cursor.close()
+from django.http import Http404
 
 
 def parse_quote_names():
@@ -103,24 +104,47 @@ def parse_quote_names():
 
 
 def quote_name_search(keyword):
-    with sqlite3.connect('names.sqlite3') as connection:
+    with sqlite3.connect('ui/business_logic/names.sqlite3') as connection:
         cursor = connection.cursor()
         cursor.execute(f'''
-            SELECT (symbol, name, price, `change`, change_percent, volume)
-            FROM names WHERE name LIKE "%{keyword}%" OR symbol LIKE "%{keyword}%"
+            SELECT * FROM names WHERE name LIKE "{keyword}%" OR symbol LIKE "{keyword}%"
         ''')
         result = cursor.fetchall()
         cursor.close()
         return result
 
 
-def get_all_quotes():
+def get_all_quotes(page:int, limit:int):
     with sqlite3.connect('ui/business_logic/names.sqlite3') as connection:
         cursor = connection.cursor()
-        cursor.execute(f'''SELECT * FROM names''')
+        cursor.execute(
+            f'''SELECT * FROM names LIMIT {limit} OFFSET {page * limit}'''
+        )
         result = cursor.fetchall()
         cursor.close()
         return result
+
+
+def paginate(current_page, limit):
+    with sqlite3.connect('ui/business_logic/names.sqlite3') as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            f'''SELECT * FROM names'''
+        )
+        total_amount = len(cursor.fetchall())
+        cursor.close()
+        pages_amount = (total_amount // limit) + (total_amount % limit)
+        if pages_amount - current_page < 0:
+            raise Http404
+        else:
+            return {'page_numbers': list(
+                range(1, pages_amount + 1)
+            )[(current_page - 5 if current_page - 5 >= 0 else 0):(current_page + 4)],
+                    'no_further': pages_amount - current_page <= 4,
+                    'no_back': current_page <= 4,
+                    'current_page': current_page
+                    }
+
 
 # if __name__ == '__main__':
 #     parse_quote_names()

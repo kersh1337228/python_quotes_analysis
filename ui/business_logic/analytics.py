@@ -6,6 +6,7 @@ import numpy
 import matplotlib.pyplot as plt
 import pandas
 from mpl_finance import candlestick_ohlc
+import mplfinance
 
 '''Briefcase class, storing the strategy,
 money amount, shares amount and shares cost,
@@ -226,6 +227,35 @@ def plot_builder(time, cost, points, money):
     plt.close()
 
 
+def build_candle_plot(quotes):
+    # Formatting data
+    data = pandas.DataFrame({
+        'Open': [value['open'] for value in quotes.values()],
+        'High': [value['high'] for value in quotes.values()],
+        'Low': [value['low'] for value in quotes.values()],
+        'Close': [value['close'] for value in quotes.values()],
+        'Volume': [value['volume'] for value in quotes.values()],
+    }, index=pandas.DatetimeIndex(quotes.keys()))
+    # Creating and customising plot
+    plot, axes = mplfinance.plot(
+        data=data, type='candle',
+        style=mplfinance.make_mpf_style(
+            marketcolors=mplfinance.make_marketcolors(
+                up='#0ecb81', down='#f6465d', edge='none',
+                volume={'up': '#0ecb81', 'down': '#f6465d'},
+                wick={'up': '#0ecb81', 'down': '#f6465d'},
+            ),
+            facecolor='#161a1e', edgecolor='#474d57',
+            figcolor='#161a1e', gridcolor='#1a1e23',
+        ),
+        volume=True, returnfig=True
+    )
+    for axe in axes: # Changing axes colors
+        axe.tick_params(labelcolor='#838d9b')
+        axe.set_ylabel(axe.get_ylabel(), color='#838d9b')
+    plot.savefig('ui/business_logic/plot.png')
+
+
 '''The main-hub function'''
 def main(raw_filename, time_interval, raw_strategy):
 
@@ -268,3 +298,7 @@ def main(raw_filename, time_interval, raw_strategy):
         'time_interval_start': dates[0],
         'time_interval_end': dates[-1],
     }
+
+
+if __name__ == '__main__':
+    build_candle_plot()

@@ -6,11 +6,12 @@
 {% block content %}
     <div class="portfolios">
         <div class="portfolio_add">
-            <div class="button_div">Update data</div>
+            <input type="text" id="quotes_search" placeholder="Search">
         </div>
         <div class="portfolios_list">
             {% if quotes %}
                 <div class="quotes_list_header">
+                    <div>Sort</div>
                     <ul>
                         <li class="quotes_symbol">Symbol</li>
                         <li class="quotes_name">Name</li>
@@ -32,6 +33,21 @@
                         </ul>
                     </div>
                 {% endfor %}
+                <ul class="pagination">
+                    {% if not pagination.no_back %}
+                        <li><a href="?page={{ pagination.current_page|add:"-1" }}"><<</a></li>
+                    {% endif %}
+                    {% for page in pagination.page_numbers %}
+                        {% if page != pagination.current_page %}
+                            <li><a href="?page={{ page }}">{{ page }}</a></li>
+                        {% else %}
+                            <li class="current_page">{{ page }}</li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if not pagination.no_further %}
+                        <li><a href="?page={{ pagination.current_page|add:"1" }}">>></a></li>
+                    {% endif %}
+                </ul>
             {% else %}
                 No quotes. Update the data.
             {% endif %}

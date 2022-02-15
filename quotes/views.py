@@ -1,13 +1,14 @@
 import datetime
 
+from django.core.paginator import Paginator
 from django.forms import model_to_dict
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from rest_framework.generics import CreateAPIView,\
     RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.response import Response
 
-from ui.business_logic.data_parser import get_all_quotes
+from ui.business_logic.data_parser import get_all_quotes, quote_name_search, paginate
 from .forms import PortfolioCreateForm
 from .models import Portfolio, Share, Quote
 
@@ -111,16 +112,22 @@ class PortfolioAPIView(
         if request.is_ajax():
             # Add, change amount of or delete shares
             portfolio = Portfolio.objects.get(
-                slug=kwargs.get('slug'),
+                slug=request.data.get('slug'),
             )
             if request.data.get('type') == 'add':
-                portfolio.shares.add(
-                    Share.objects.create(
-                        origin=Quote.objects.get(
-                            symbol=request.data.get('symbol')
-                        ),
-                        amount=1,
-                    )
+                share = Share.objects.create(
+                    origin=Quote.objects.get(
+                        symbol=request.data.get('symbol')
+                    ),
+                    amount=1,
+                )
+                portfolio.shares.add(share)
+                return Response(
+                    data={'share': {
+                        'symbol': share.origin.symbol,
+                        'name': share.origin.name
+                    }},
+                    status=200
                 )
             elif request.data.get('type') == 'change_amount':
                 portfolio.shares.filter(
@@ -187,18 +194,22 @@ class QuotesAPIView(
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
             if not Quote.objects.filter(slug=kwargs.get('slug')):
-                print('\n\tHELLO\t\n')
+                Quote.add_quote_by_symbol(
+                    request.query_params.get('symbol'),
+                    request.query_params.get('name'),
+                    kwargs.get('slug'),
+                )
             return Response(
                 data={},
-                status=200
+                status=201
             )
         else:
             return render(
                 request=request,
-                template_name='quotes_list.html',
-                context={'quotes': [
-                    result[0].strip() for result in get_all_quotes()
-                ]}
+                template_name='quotes_detail.html',
+                context={'quote': Quote.objects.get(
+                    slug=kwargs.get('slug')
+                )}
             )
 
     def post(self, request, *args, **kwargs):
@@ -230,9 +241,22 @@ class QuotesListAPIView(
     ListAPIView
 ):
     def get(self, request, *args, **kwargs):
+        print(request.query_params.get('page'))
         if request.is_ajax():
-            pass
+            return Response(
+                {'results':
+                     [{
+                         'symbol': 'a',
+                         'name': 'b',
+                         'price': ''
+                     } for result in quote_name_search(
+                         request.query_params.get('search')
+                     )]},
+                status=200
+            )
         else:
+            current_page = int(request.query_params.get('page', 1))
+            quotes = get_all_quotes(current_page - 1, 50)
             return render(
                 request=request,
                 template_name='quotes_list.html',
@@ -244,6 +268,8 @@ class QuotesListAPIView(
                         'change_percent': quote[4],
                         'volume': quote[5],
                         'slug': quote[1].lower().replace(' ', '_'),
-                    } for quote in get_all_quotes()]
+                    } for quote in quotes],
+                    'downloaded_quotes': [quote.symbol for quote in Quote.objects.all()],
+                    'pagination': paginate(current_page, 50)
                 }
             )

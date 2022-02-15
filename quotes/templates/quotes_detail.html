@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ quote.name }}{% endblock %}
+
+{% block content %}
+    <div class="portfolio">
+        <h1 class="portfolio_name">{{ quote.name }}</h1>
+        <img src="{{ quote.price_plot.url }}">
+    </div>
+{% endblock %}

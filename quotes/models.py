@@ -1,6 +1,9 @@
 from alpha_vantage.timeseries import TimeSeries
+from django.core.files import File
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from ui.business_logic.analytics import build_candle_plot
 from ui.models import Log
 
 
@@ -52,6 +55,12 @@ class Quote(models.Model):
         blank=False,
         null=False
     )
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False
+    )
     quotes = models.JSONField()
     price_plot = models.ImageField(
         upload_to='plots'
@@ -64,33 +73,43 @@ class Quote(models.Model):
     )
 
     @staticmethod
-    def add_quote_by_name(symbol):
+    def add_quote_by_symbol(symbol, name, slug):
         # Parsing quotes data
         time_series = TimeSeries(key=api_key, output_format='json')
         (data, meta_data) = time_series.get_daily(symbol=symbol, outputsize='full')
         # Adding quotes data to the database
-        return Quote.objects.create(
+        quote = Quote.objects.create(
             symbol=symbol,
+            name=name,
             quotes={key: {
-                'open': data[key]['1. open'],
-                'high': data[key]['2. high'],
-                'low': data[key]['3. low'],
-                'close': data[key]['4. close'],
-                'volume': data[key]['5. volume']
+                'open': float(data[key]['1. open']),
+                'high': float(data[key]['2. high']),
+                'low': float(data[key]['3. low']),
+                'close': float(data[key]['4. close']),
+                'volume': float(data[key]['5. volume'])
             } for key in data},
-            slug=symbol.replace(' ', '_')
+            slug=slug
         )
+        quote.build_price_plot()
+        return quote
+
+    def build_price_plot(self):
+        build_candle_plot(self.quotes)
+        self.price_plot.save(
+            f'{self.slug}_price_plot.png',
+            File(open('ui/business_logic/plot.png', 'rb'))
+        )
+        self.save()
+
+    def __str__(self):
+        return self.name
 
 
 '''Share model used to create portfolios'''
-class Share(Quote):
+class Share(models.Model):
     origin = models.ForeignKey(
         Quote,
         on_delete=models.CASCADE,
         related_name='share_origin'
     )
     amount = models.IntegerField()
-
-
-    def __str__(self):
-        return self.symbol

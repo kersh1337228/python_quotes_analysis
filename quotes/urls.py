@@ -24,17 +24,27 @@ urlpatterns = [
         name='portfolio_update'
     ),
     path(
+        'portfolio/share/',
+        PortfolioAPIView.as_view(),
+        name='portfolio_share'
+    ),
+    path(
         'portfolio/delete/<slug:slug>',
         PortfolioAPIView.as_view(),
         name='portfolio_delete'
     ),
     path(
-        'quotes/list/',
+        'list/',
         QuotesListAPIView.as_view(),
         name='quotes_list'
     ),
     path(
-        'quotes/detail/<slug:slug>',
+        'list/search/',
+        QuotesListAPIView.as_view(),
+        name='quotes_list_search'
+    ),
+    path(
+        'detail/<slug:slug>',
         QuotesAPIView.as_view(),
         name='quotes_detail'
     )

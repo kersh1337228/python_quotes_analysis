@@ -12,12 +12,13 @@
         <div class="portfolio_balance">Balance: {{ portfolio.balance }} $</div>
         <div class="portfolio_shares">
             <h2>Shares</h2>
-            {% if portfolio.shares|length %}
+            <h4 id="portfolio_add_shares">Add shares +</h4>
+            {% if portfolio.shares %}
                 {% for share in portfolio.shares.all %}
-                    <div>Share</div>
+                    <div>{{ share.origin.symbol }} | {{ share.origin.name }}</div>
                 {% endfor %}
             {% else %}
-                No shares yet
+                <span>No shares yet</span>
             {% endif %}
         </div>
         <div class="portfolio_logs">

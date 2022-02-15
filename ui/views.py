@@ -4,6 +4,8 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, CreateView, DetailView, ListView, DeleteView
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
+
+from quotes.models import Quote
 from .business_logic.analytics import main
 from .business_logic.data_parser import quote_name_search
 from .forms import *
@@ -18,19 +20,18 @@ class UIAPIView(
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
             data = parse_json(request.query_params.copy())
-            if data.get('step') == 'id_share_name':
-                return Response(
-                    {'results':
-                         [result[0].strip() for result in quote_name_search(data.get('name'))]
-                         if data.get('name') else []},
-                    status=200
-                )
-            elif data.get('step') == '':
-                pass
-            elif data.get('step') == '':
-                pass
-            else:
-                pass
+            quotes = Quote.objects.filter(
+                Q(symbol__icontains=data.get('name')) |
+                Q(name__icontains=data.get('name'))
+            )
+            return Response(
+                {'results': [{
+                    'symbol': quote.symbol,
+                    'name': quote.name,
+                    'slug': quote.slug,
+                } for quote in quotes] if quotes else []},
+                status=200
+            )
         else:
             return render(
                 request, 'main.html',

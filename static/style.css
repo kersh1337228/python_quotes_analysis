@@ -272,6 +272,26 @@ option {
     color: rgb(150, 150, 150);
 }
 
+#portfolio_add_shares {
+    color: rgb(92, 171, 50);
+    cursor: pointer;
+    transition: color 0.7s;
+}
+
+#portfolio_add_shares:hover {
+    color: rgb(16, 120, 0);
+}
+
+#portfolio_confirm_add {
+    color: rgb(227, 173, 0);
+    cursor: pointer;
+    transition: color 0.7s;
+}
+
+#portfolio_confirm_add:hover {
+    color: rgb(182, 106, 0);
+}
+
 .quotes_details {
     cursor: pointer;
 }
@@ -306,6 +326,14 @@ option {
 .quotes_price, .quotes_change,
 .quotes_changep, .quotes_volume {
     justify-self: end;
+}
+
+.pagination {
+    justify-self: center;
+}
+
+.pagination li {
+    font-size: 20px;
 }
 
 .share_name {

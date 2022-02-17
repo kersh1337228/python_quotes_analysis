@@ -1,0 +1,15 @@
+<div {% if quote.symbol not in downloaded_quotes %}
+            class="quotes_details"
+            {% else %}
+            class="quotes_details_downloaded"
+            {% endif %}
+     id="{{ quote.slug }}">
+    <ul>
+        <li class="quotes_symbol">{{ quote.symbol }}</li>
+        <li class="quotes_name">{{ quote.name }}</li>
+        <li class="quotes_price">{{ quote.price }}</li>
+        <li class="quotes_change">{{ quote.change }}</li>
+        <li class="quotes_changep">{{ quote.change_percent }}</li>
+        <li class="quotes_volume">{{ quote.volume }}</li>
+    </ul>
+</div>

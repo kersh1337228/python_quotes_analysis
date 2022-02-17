@@ -4,8 +4,30 @@
 {% block title %}{{ quote.name }}{% endblock %}
 
 {% block content %}
-    <div class="portfolio">
-        <h1 class="portfolio_name">{{ quote.name }}</h1>
-        <img src="{{ quote.price_plot.url }}">
+    <div class="quote">
+        <h1 class="quote_name">{{ quote.name }}</h1>
+        <h1 class="quote_symbol">{{ quote.symbol }}</h1>
+        <h3 class="last_quotes">Last quotes</h3>
+        <ul class="quote_quotes_header">
+            <li>Open</li>
+            <li>High</li>
+            <li>Low</li>
+            <li>Close</li>
+            <li>Volume</li>
+            <li>Date</li>
+        </ul>
+        <ul class="quote_quotes">
+            <li>{{ quotes.open }}</li>
+            <li>{{ quotes.high }}</li>
+            <li>{{ quotes.low }}</li>
+            <li>{{ quotes.close }}</li>
+            <li>{{ quotes.volume }}</li>
+            <li>{{ quotes.date }}</li>
+        </ul>
+        <div class="quote_price_plot">
+            <h3>Price change</h3>
+            <img src="{{ quote.price_plot.url }}">
+        </div>
+        <br><br><br>
     </div>
 {% endblock %}

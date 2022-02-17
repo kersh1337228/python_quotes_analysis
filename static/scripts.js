@@ -201,7 +201,7 @@ $(document).ready(function () {
         }
     })
     // Quote click
-    $('.content').on('click', '.quotes_details', function() {
+    $('.content').on('click', '.quotes_details, .quotes_details_downloaded', function() {
         const quote = $(this)
         $.ajax({
                 url: `${window.location.origin}/quotes/detail/${quote.attr('id')}`,
@@ -211,59 +211,75 @@ $(document).ready(function () {
                     name: quote.find('ul .quotes_name').text()
                 },
                 success: function (response) {
-                    window.location.href = `${window.location.origin}/quotes/quotes/detail/${quote.attr('id')}`
+                    window.location.href = `${window.location.origin}/quotes/detail/${quote.attr('id')}`
                 },
                 error: function (response) {
                     alert('Error')
                 }
         })
     })
-    try {
-        for (i in $('.quotes_change')) {
-            let change = $($('.quotes_change')[i])
-            if (change.text().startsWith('-')) {
-                change.css('color', 'rgb(171, 92, 92)')
-            } else if (change.text().startsWith('+')) {
-                change.css('color', 'rgb(92, 171, 50)')
-            } else if (change.text() !== 'Change $') {
-                change.css('color', 'rgb(219,168,0)')
+    function quotes_colors() {
+        try {
+            for (i in $('.quotes_change')) {
+                let change = $($('.quotes_change')[i])
+                if (change.text().startsWith('-')) {
+                    change.css('color', 'rgb(171, 92, 92)')
+                } else if (change.text().startsWith('+')) {
+                    change.css('color', 'rgb(92, 171, 50)')
+                } else if (change.text() !== 'Change $') {
+                    change.css('color', 'rgb(219,168,0)')
+                }
             }
-        }
-        for (i in $('.quotes_changep')) {
-            let change = $($('.quotes_changep')[i])
-            if (change.text().startsWith('-')) {
-                change.css('color', 'rgb(171, 92, 92)')
-            } else if (change.text().startsWith('+')) {
-                change.css('color', 'rgb(92, 171, 50)')
-            } else if (change.text() !== 'Change %') {
-                change.css('color', 'rgb(219,168,0)')
+            for (i in $('.quotes_changep')) {
+                let change = $($('.quotes_changep')[i])
+                if (change.text().startsWith('-')) {
+                    change.css('color', 'rgb(171, 92, 92)')
+                } else if (change.text().startsWith('+')) {
+                    change.css('color', 'rgb(92, 171, 50)')
+                } else if (change.text() !== 'Change %') {
+                    change.css('color', 'rgb(219,168,0)')
+                }
             }
-        }
-    } catch (error) {}
+        } catch (error) {}
+    }
+    quotes_colors()
     // Quotes list search
     $('.content').on('input paste', '#quotes_search', function () {
-        search_input = $(this)
         $.ajax({
             url: `${window.location.origin}/quotes/list/search/`,
             type: 'GET',
             data: {
-                search: search_input.val()
+                search: $(this).val(),
+                page: window.location.href.match(/\/\?page=([\w]+)/) ?
+                    window.location.href.match(/\/\?page=([\w]+)/)[1] : 1
             },
+            async: false,
             success: function (response) {
-                $('.share_name').remove()
-                search_input.css('border-radius', '11px')
-                if (!response.results.length && search_input.val() !== '') {
-                    search_input.css('border-radius', '11px 11px 0 0')
-                    search_input.after('<div class="share_name">No matches</div>')
-                } else if (response.results.length) {
-                    search_input.css('border-radius', '11px 11px 0 0')
-                    search_input.after('<select class="share_name"></select>')
-                    response.results.forEach(function (element, index) {
-                        $('.share_name').append(
-                            `<option value="${element.symbol}">${element.symbol} | ${element.name}</option>`
-                        )
-                    })
+                if (response.quotes_html) {
+                    $('.portfolios_list').replaceWith(`
+                        <div class="portfolios_list">
+                            <div class="quotes_list_header">
+                                <ul>
+                                    <li class="quotes_symbol">Symbol</li>
+                                    <li class="quotes_name">Name</li>
+                                    <li class="quotes_price">Price $</li>
+                                    <li class="quotes_change">Change $</li>
+                                    <li class="quotes_changep">Change %</li>
+                                    <li class="quotes_volume">Volume</li>
+                                </ul>
+                            </div>
+                            ${response.quotes_html}
+                        </div>
+                    `)
+                } else {
+                    $('.portfolios_list').replaceWith(`
+                        <div class="portfolios_list">No matching quotes</div>
+                    `)
                 }
+                if (response.pagination_html) {
+                    $('.portfolios_list').append(`${response.pagination_html}`)
+                }
+                quotes_colors()
             },
             error: function (response) {
                 alert('error')

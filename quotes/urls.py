@@ -44,7 +44,7 @@ urlpatterns = [
         name='quotes_list_search'
     ),
     path(
-        'detail/<slug:slug>',
+        'detail/<slug:slug>/',
         QuotesAPIView.as_view(),
         name='quotes_detail'
     )

@@ -11,7 +11,6 @@
         <div class="portfolios_list">
             {% if quotes %}
                 <div class="quotes_list_header">
-                    <div>Sort</div>
                     <ul>
                         <li class="quotes_symbol">Symbol</li>
                         <li class="quotes_name">Name</li>
@@ -22,32 +21,11 @@
                     </ul>
                 </div>
                 {% for quote in quotes %}
-                    <div class="quotes_details" id="{{ quote.slug }}">
-                        <ul>
-                            <li class="quotes_symbol">{{ quote.symbol }}</li>
-                            <li class="quotes_name">{{ quote.name }}</li>
-                            <li class="quotes_price">{{ quote.price }}</li>
-                            <li class="quotes_change">{{ quote.change }}</li>
-                            <li class="quotes_changep">{{ quote.change_percent }}</li>
-                            <li class="quotes_volume">{{ quote.volume }}</li>
-                        </ul>
-                    </div>
+                    {% quote_tag quote=quote downloaded_quotes=downloaded_quotes %}
                 {% endfor %}
-                <ul class="pagination">
-                    {% if not pagination.no_back %}
-                        <li><a href="?page={{ pagination.current_page|add:"-1" }}"><<</a></li>
-                    {% endif %}
-                    {% for page in pagination.page_numbers %}
-                        {% if page != pagination.current_page %}
-                            <li><a href="?page={{ page }}">{{ page }}</a></li>
-                        {% else %}
-                            <li class="current_page">{{ page }}</li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if not pagination.no_further %}
-                        <li><a href="?page={{ pagination.current_page|add:"1" }}">>></a></li>
-                    {% endif %}
-                </ul>
+                {% if pagination %}
+                    {% pagination_tag pagination=pagination %}
+                {% endif %}
             {% else %}
                 No quotes. Update the data.
             {% endif %}

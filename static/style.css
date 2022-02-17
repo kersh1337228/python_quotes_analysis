@@ -292,22 +292,34 @@ option {
     color: rgb(182, 106, 0);
 }
 
-.quotes_details {
+.pagination {
+    justify-self: center;
+}
+
+.pagination li {
+    font-size: 20px;
+}
+
+.quotes_details, .quotes_details_downloaded {
     cursor: pointer;
 }
 
-.quotes_details, .quotes_list_header {
+.quotes_details, .quotes_details_downloaded, .quotes_list_header {
     background: rgb(40, 40, 40);
     padding: 15px 15px 15px 15px;
     border-radius: 10px;
     transition: background 0.7s;
 }
 
-.quotes_details:hover {
+.quotes_details_downloaded {
+    background: rgb(40, 60, 40);;
+}
+
+.quotes_details:hover, .quotes_details_downloaded:hover {
     background: rgb(20, 20, 20);
 }
 
-.quotes_details ul, .quotes_list_header ul {
+.quotes_details ul, .quotes_details_downloaded ul, .quotes_list_header ul {
     display: grid;
     grid-auto-flow: row;
     grid-template-columns: repeat(6, 1fr);
@@ -328,12 +340,67 @@ option {
     justify-self: end;
 }
 
-.pagination {
-    justify-self: center;
+.quote {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 15px 15px;
+    width: 700px;
 }
 
-.pagination li {
-    font-size: 20px;
+.quote_name {
+    grid-row-start: 1;
+    grid-row-end: 1;
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+.quote_symbol {
+    grid-row-start: 1;
+    grid-row-end: 1;
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
+.last_quotes {
+    grid-row-start: 2;
+    grid-row-end: 2;
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
+
+.quote ul {
+    padding: 0 0 0 0;
+    margin: 0 0 0 0;
+}
+
+.quote_quotes_header {
+    grid-row-start: 3;
+    grid-row-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.quote_quotes {
+    grid-row-start: 4;
+    grid-row-end: 4;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.quote_price_plot {
+    grid-row-start: 5;
+    grid-row-end: 5;
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
+
+.quote_price_plot img {
+    width: 700px;
+    height: auto;
 }
 
 .share_name {

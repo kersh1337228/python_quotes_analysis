@@ -253,7 +253,7 @@ def build_candle_plot(quotes):
     for axe in axes: # Changing axes colors
         axe.tick_params(labelcolor='#838d9b')
         axe.set_ylabel(axe.get_ylabel(), color='#838d9b')
-    plot.savefig('ui/business_logic/plot.png')
+    plot.savefig('ui/business_logic/plot.png', dpi=1200)
 
 
 '''The main-hub function'''
@@ -300,5 +300,5 @@ def main(raw_filename, time_interval, raw_strategy):
     }
 
 
-if __name__ == '__main__':
-    build_candle_plot()
+# if __name__ == '__main__':
+#     build_candle_plot()

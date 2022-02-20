@@ -23,11 +23,11 @@ $(document).ready(function () {
     $('.content').on('input paste', '#id_share_name', function () {
         search_input = $(this)
         $.ajax({
-            url: `${window.location.origin}/analysis/form/`,
+            url: `${window.location.origin}/quotes/list/search/`,
             type: 'GET',
             data: {
                 name: search_input.val(),
-                step: search_input.attr('id')
+                downloaded: true
             },
             success: function (response) {
                 $('.share_name').remove()
@@ -286,16 +286,21 @@ $(document).ready(function () {
             }
         })
     })
+    $('.content').on('click', '.portfolio_shares_edit_menu', function () {
+        let menu = $(this).children('ul')
+        if (menu.css('display') !== 'none') {
+            menu.fadeOut(200)
+        } else {
+            menu.fadeIn(200)
+        }
+    })
     // Show share search form
     $('.content').on('click', '#portfolio_add_shares', function () {
-        if (!$('#id_share_name').length) {
-           $(this).after(`<input type="text" name="share_name" placeholder="Enter the share name" 
-                maxlength="255" required="" id="id_share_name">
-                <div id="portfolio_confirm_add">Add</div>
-            `)
+        if ($('#id_share_name').css('display') === 'none') {
+            $('#id_share_name, #portfolio_confirm_add').show(200)
         } else {
-            $('#id_share_name').remove()
-            $('#portfolio_confirm_add').remove()
+            $('#id_share_name, #portfolio_confirm_add').hide(200)
+            $('#id_share_name').css('border-radius', '11px')
             $('.share_name').remove()
         }
     })
@@ -323,5 +328,113 @@ $(document).ready(function () {
                 }
             })
     })
-
+    // Show change shares amount input
+    $('.content').on('click', '#portfolio_shares_amount_change', function () {
+        let amount_node = $(this).parent().parent().parent().children('.shares_amount')
+        const amount = parseInt(amount_node.text())
+        amount_node.text('')
+        amount_node.append(`<input type="text" maxlength="5" placeholder="Amount" 
+        class="shares_input" id="${amount}">
+        <ul>
+            <li id="cancel_shares_amount_change">Cancel</li>
+            <li id="confirm_shares_amount_change">Confirm</li>
+        </ul>
+        `)
+        $('.shares_input').val(amount)
+    })
+    // Change shares amount cancel button click
+    $('.content').on('click', '#cancel_shares_amount_change', function () {
+        $(this).parent().parent().text(`${$('.shares_input').attr('id')}`)
+    })
+    // Change shares amount confirm button click
+    $('.content').on('click', '#confirm_shares_amount_change', function () {
+        let amount = $(this).parent().parent().children('.shares_input').val()
+        if (parseInt(amount) === NaN) {
+            $('#cancel_shares_amount_change').trigger('click')
+            return
+        } else {
+            amount = Math.abs(parseInt(amount))
+            if (amount === $(this).parent().parent().children('.shares_input').attr('id') || amount === 0) {
+                $('#cancel_shares_amount_change').trigger('click')
+                return
+            }
+        }
+        let button = $(this)
+        $.ajax({
+                url: `${window.location.origin}/quotes/portfolio/share/`,
+                type: 'PUT',
+                headers: {'X-CSRFTOKEN': get_csrf()},
+                data: {
+                    symbol: $(this).parent().parent().parent().children('.share_origin_symbol').text(),
+                    slug: window.location.href.match(/\/quotes\/portfolio\/detail\/([\w]+)/)[1],
+                    amount: amount,
+                    type: 'change_amount'
+                },
+                success: function (response) {
+                    button.parent().parent().parent().children('.shares_amount').text(amount)
+                },
+                error: function (response) {}
+            })
+    })
+    // Delete shares click
+    $('.content').on('click', '#portfolio_shares_delete', function () {
+        if (confirm('Are you sure you want to delete the share?')) {
+            let button = $(this)
+            $.ajax({
+                url: `${window.location.origin}/quotes/portfolio/share/`,
+                type: 'PUT',
+                headers: {'X-CSRFTOKEN': get_csrf()},
+                data: {
+                    symbol: $(this).parent().parent().parent().children('.share_origin_symbol').text(),
+                    slug: window.location.href.match(/\/quotes\/portfolio\/detail\/([\w]+)/)[1],
+                    type: 'delete'
+                },
+                success: function (response) {
+                    button.parent().parent().parent().remove()
+                    if (!$('.portfolio_share').length) {
+                        $('.portfolio_shares_header').remove()
+                        $('.portfolio_shares').append('<span>No shares yet</span>')
+                    }
+                },
+                error: function (response) {}
+            })
+        }
+    })
+    //
+    // Analysis
+    //
+    $('.content').on('change', '#id_portfolio', function() {
+        if ($(this).val()) {
+            $.ajax({
+                url: `${window.location.origin}/analysis/form/`,
+                type: 'GET',
+                data: {
+                    step: 'portfolio',
+                    slug: $(this).val(),
+                },
+                success: function (response) {
+                    $('.errorlist').remove()
+                    $('#id_portfolio').after(`
+                        <select id="id_time_interval_start"></select>
+                    `)
+                    response.dates.forEach(
+                        (date) => {
+                            $('#id_time_interval_start').append(`
+                                <option value="${date}">${date}</option>
+                            `)
+                        }
+                    )
+                },
+                error: function (response) {
+                    $('#id_portfolio').before(`
+                        <ul class="errorlist">
+                            <li>${response.responseJSON.error_message}</li>
+                        </ul>
+                    `)
+                }
+            })
+        } else {
+            $('#id_time_interval_start, #id_time_interval_end, #strategy_name').remove()
+        }
+    })
 })

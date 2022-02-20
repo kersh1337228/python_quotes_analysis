@@ -1,6 +1,7 @@
 import datetime
 
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.forms import model_to_dict
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -133,10 +134,12 @@ class PortfolioAPIView(
                 portfolio.shares.filter(
                     origin=Quote.objects.get(
                         symbol=request.data.get('symbol')
-                    ).update(
-                        amount=request.data.get('amount')
                     )
+                ).update(
+                    amount=request.data.get('amount')
                 )
+                portfolio.last_updated=datetime.datetime.now()
+                portfolio.save()
             elif request.data.get('type') == 'delete':
                 portfolio.shares.get(
                     origin=Quote.objects.get(
@@ -251,43 +254,57 @@ class QuotesListAPIView(
 ):
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
-            results = quote_name_search(
-                 request.query_params.get('search')
-            ) if request.query_params.get('search') else \
-                get_all_quotes(int(request.query_params.get('page', 1)) - 1, 50)
-            quotes = [{
-                'symbol': result[0],
-                'name': result[1],
-                'price': result[2],
-                'change': result[3],
-                'change_percent': result[4],
-                'volume': result[5],
-                'slug': result[1].lower().replace(' ', '_').replace(',', '_').replace('.', '_'),
-            } for result in results]
-            quotes_html = ''
-            for quote in quotes:
-                quotes_html += render_to_string(
-                    template_name='quote.html',
-                    context={
-                        'quote': quote,
-                        'downloaded_quotes': [quote.symbol for quote in Quote.objects.all()],
-                    },
-                    request=request,
+            if request.query_params.get('downloaded'):
+                quotes = Quote.objects.filter(
+                    Q(symbol__icontains=request.query_params.get('name')) |
+                    Q(name__icontains=request.query_params.get('name'))
                 )
-            return Response(
-                data={
-                    'quotes_html': quotes_html,
-                    'pagination_html': render_to_string(
-                        template_name='pagination.html',
+                return Response(
+                    {'results': [{
+                        'symbol': quote.symbol,
+                        'name': quote.name,
+                        'slug': quote.slug,
+                    } for quote in quotes] if quotes else []},
+                    status=200
+                )
+            else:
+                results = quote_name_search(
+                     request.query_params.get('search')
+                ) if request.query_params.get('search') else \
+                    get_all_quotes(int(request.query_params.get('page', 1)) - 1, 50)
+                quotes = [{
+                    'symbol': result[0],
+                    'name': result[1],
+                    'price': result[2],
+                    'change': result[3],
+                    'change_percent': result[4],
+                    'volume': result[5],
+                    'slug': result[1].lower().replace(' ', '_').replace(',', '_').replace('.', '_'),
+                } for result in results]
+                quotes_html = ''
+                for quote in quotes:
+                    quotes_html += render_to_string(
+                        template_name='quote.html',
                         context={
-                            'pagination': paginate(int(request.query_params.get('page', 1)), 50)
+                            'quote': quote,
+                            'downloaded_quotes': [quote.symbol for quote in Quote.objects.all()],
                         },
-                        request=request
-                    ) if not request.query_params.get('search') else None
+                        request=request,
+                    )
+                return Response(
+                    data={
+                        'quotes_html': quotes_html,
+                        'pagination_html': render_to_string(
+                            template_name='pagination.html',
+                            context={
+                                'pagination': paginate(int(request.query_params.get('page', 1)), 50)
+                            },
+                            request=request
+                        ) if not request.query_params.get('search') else None
 
-                },
-                status=200
-            )
+                    },
+                    status=200
+                )
         else:
             current_page = int(request.query_params.get('page', 1))
             quotes = get_all_quotes(current_page - 1, 50)

@@ -1,10 +1,11 @@
+import datetime
 from alpha_vantage.timeseries import TimeSeries
 from django.core.files import File
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
 from ui.business_logic.analytics import build_candle_plot
 from ui.models import Log
+import pandas
 
 
 api_key = 'J7JRRVLFS9HZFPBY'
@@ -43,6 +44,22 @@ class Portfolio(models.Model):
         null=False,
         unique=True,
     )
+
+    def get_quotes_dates(self):
+        return (pandas.date_range(
+            max([datetime.datetime.strptime(
+                list(share.origin.quotes.keys())[-1],
+                '%Y-%m-%d'
+            ) for share in self.shares.all()]),
+            min([datetime.datetime.strptime(
+                list(share.origin.quotes.keys())[0],
+                '%Y-%m-%d'
+            ) for share in self.shares.all()])
+        )).strftime('%Y-%m-%d').tolist()
+
+
+    def __str__(self):
+        return self.name
 
 
 '''Economic market instrument, representing shares,

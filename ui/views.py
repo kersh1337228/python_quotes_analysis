@@ -19,19 +19,23 @@ class UIAPIView(
 ):
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
-            data = parse_json(request.query_params.copy())
-            quotes = Quote.objects.filter(
-                Q(symbol__icontains=data.get('name')) |
-                Q(name__icontains=data.get('name'))
-            )
-            return Response(
-                {'results': [{
-                    'symbol': quote.symbol,
-                    'name': quote.name,
-                    'slug': quote.slug,
-                } for quote in quotes] if quotes else []},
-                status=200
-            )
+            if request.query_params.get('step') == 'portfolio':
+                portfolio = Portfolio.objects.get(
+                    slug=request.query_params.get('slug')
+                )
+                if not len(portfolio.shares.all()):
+                    return Response(
+                        data={
+                            'error_message': 'No shares in the portfolio'
+                        },
+                        status=400
+                    )
+                return Response(
+                    data={
+                        'dates': portfolio.get_quotes_dates()
+                    },
+                    status=200
+                )
         else:
             return render(
                 request, 'main.html',

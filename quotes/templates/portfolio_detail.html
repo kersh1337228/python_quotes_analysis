@@ -12,10 +12,30 @@
         <div class="portfolio_balance">Balance: {{ portfolio.balance }} $</div>
         <div class="portfolio_shares">
             <h2>Shares</h2>
-            <h4 id="portfolio_add_shares">Add shares +</h4>
-            {% if portfolio.shares %}
+            <div id="portfolio_add_shares">Add shares +</div>
+            <input type="text" name="share_name" placeholder="Enter the share name"
+                maxlength="255" required="" id="id_share_name">
+            <div id="portfolio_confirm_add">Add</div>
+            {% if portfolio.shares.all %}
+                <ul class="portfolio_shares_header">
+                    <li class="share_origin_name">Name</li>
+                    <li class="share_origin_symbol">Symbol</li>
+                    <li class="shares_amount">Amount</li>
+                </ul>
                 {% for share in portfolio.shares.all %}
-                    <div>{{ share.origin.symbol }} | {{ share.origin.name }}</div>
+                        <ul class="portfolio_share">
+                            <li class="share_origin_name">
+                                <a href="{% url 'quotes_detail' slug=share.origin.slug %}">{{ share.origin.name }}</a>
+                            </li>
+                            <li class="share_origin_symbol">{{ share.origin.symbol }}</li>
+                            <li class="shares_amount">{{ share.amount }}</li>
+                            <li class="portfolio_shares_edit_menu">...
+                                <ul>
+                                    <li id="portfolio_shares_amount_change">Change amount</li>
+                                    <li id="portfolio_shares_delete">Delete</li>
+                                </ul>
+                            </li>
+                        </ul>
                 {% endfor %}
             {% else %}
                 <span>No shares yet</span>

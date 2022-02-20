@@ -10,14 +10,14 @@ html, body {
 a, a:active, a:visited {
     color: white;
     text-decoration: none;
-    transition: color 0.5s;
+    transition: color 0.3s;
 }
 
 a:hover {
     color: rgb(128, 128, 128);
 }
 
-h1 {
+h1, h2, h3, h4, h5 {
     padding: 0 0 0 0;
     margin: 0 0 0 0;
 }
@@ -110,7 +110,7 @@ option {
 ::-webkit-scrollbar-thumb {
 	border-radius: 50px;
 	background: rgb(170, 170, 170);
-    transition: background 0.7s;
+    transition: background 0.3s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -145,7 +145,7 @@ option {
     background: rgb(40, 40, 40);
     padding: 15px 15px 15px 15px;
     border-radius: 10px;
-    transition: background 0.7s;
+    transition: background 0.3s;
 }
 
 .portfolio_list_header {
@@ -185,7 +185,7 @@ option {
     background: rgb(30, 30, 30);
     border-radius: 10px;
     cursor: pointer;
-    transition: background 0.7s;
+    transition: background 0.3s;
 }
 
 .button_div:hover, .submit_button:hover {
@@ -243,6 +243,104 @@ option {
     grid-row-end: 4;
     grid-column-start: 1;
     grid-column-end: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 20px 0;
+}
+
+.portfolio_shares_header {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    box-sizing: border-box;
+    padding: 15px 15px 15px 15px;
+    border-radius: 10px;
+    width: 100%;
+    margin-top: -10px;
+}
+
+.portfolio_share {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    box-sizing: border-box;
+    background: rgb(40, 40, 40);
+    padding: 15px 15px 15px 15px;
+    border-radius: 10px;
+    width: 100%;
+    margin-top: -20px;
+}
+
+.share_origin_name {
+    grid-row-start: 2;
+    grid-row-end: 2;
+    justify-self: start;
+    align-self: start;
+}
+
+.share_origin_symbol {
+    grid-row-start: 2;
+    grid-row-end: 2;
+    justify-self: end;
+    align-self: center;
+}
+
+.shares_amount {
+    grid-row-start: 2;
+    grid-row-end: 2;
+    justify-self: end;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.portfolio_shares_edit_menu {
+    grid-row-start: 1;
+    grid-row-end: 1;
+    grid-column-start: 3;
+    grid-column-end: 3;
+    align-self: start;
+    justify-self: end;
+    margin-top: -17px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.portfolio_shares_edit_menu:hover {
+    color: rgb(100, 100, 100);
+}
+
+.portfolio_shares_edit_menu ul {
+    display: none;
+    position: absolute;
+    transform: translate(-110px, 0);
+}
+
+.portfolio_shares_edit_menu li {
+    display: block;
+}
+
+#portfolio_shares_amount_change {
+    justify-self: end;
+    font-size: 14px;
+    cursor: pointer;
+    color: rgb(255, 255, 255);
+    transition: color 0.3s;
+}
+
+#portfolio_shares_amount_change:hover {
+    color: rgb(100, 100, 100);
+}
+
+#portfolio_shares_delete {
+    justify-self: end;
+    font-size: 14px;
+    cursor: pointer;
+    color: rgb(171, 92, 92);
+    transition: color 0.3s;
+}
+
+
+#portfolio_shares_delete:hover {
+    color: rgb(250, 92, 92);
 }
 
 .portfolio_logs {
@@ -252,16 +350,21 @@ option {
     grid-column-end: 4;
 }
 
+#id_share_name, #portfolio_confirm_add {
+    margin-top: 10px;
+    display: none;
+}
+
 .config_button {
     width: 400px;
     text-align: end;
     cursor: pointer;
-    transition: color 0.7s;
+    transition: color 0.3s;
 }
 
 #portfolio_delete {
     color: rgb(171, 92, 92);
-    transition: color 0.7s;
+    transition: color 0.3s;
 }
 
 #portfolio_delete:hover {
@@ -275,7 +378,9 @@ option {
 #portfolio_add_shares {
     color: rgb(92, 171, 50);
     cursor: pointer;
-    transition: color 0.7s;
+    font-size: 17px;
+    max-width: max-content;
+    transition: color 0.3s;
 }
 
 #portfolio_add_shares:hover {
@@ -283,13 +388,30 @@ option {
 }
 
 #portfolio_confirm_add {
-    color: rgb(227, 173, 0);
+    color: rgb(255, 255, 255);
     cursor: pointer;
-    transition: color 0.7s;
+    max-width: max-content;
+    transition: color 0.3s;
 }
 
 #portfolio_confirm_add:hover {
-    color: rgb(182, 106, 0);
+    color: rgb(100, 100, 100);
+}
+
+.shares_input {
+    width: 50px;
+    font-size: 14px;
+    height: 30px;
+}
+
+.shares_amount ul li {
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.shares_amount ul li:hover {
+    color: rgb(100, 100, 100);
 }
 
 .pagination {
@@ -308,7 +430,7 @@ option {
     background: rgb(40, 40, 40);
     padding: 15px 15px 15px 15px;
     border-radius: 10px;
-    transition: background 0.7s;
+    transition: background 0.3s;
 }
 
 .quotes_details_downloaded {
@@ -359,6 +481,7 @@ option {
     grid-row-end: 1;
     grid-column-start: 2;
     grid-column-end: 3;
+    align-self: center;
 }
 
 .last_quotes {
@@ -405,6 +528,7 @@ option {
 
 .share_name {
     border-radius: 0 0 8px 8px;
+    box-sizing: border-box;
     padding: 5px 5px 5px 5px;
     outline: none;
     border: none;
@@ -412,6 +536,8 @@ option {
     height: auto;
     background: rgb(50, 50, 50);
     color: white;
+    font-size: 12px;
+    margin-top: -20px;
 }
 
 #id_time_interval_start, #id_time_interval_end {
@@ -441,7 +567,7 @@ option {
     width: 100%;
     height: 30px;
     cursor: pointer;
-    transition: background 0.7s;
+    transition: background 0.3s;
 }
 
 .plot_button:hover {
@@ -459,7 +585,7 @@ option {
     align-content: center;
     justify-content: center;
     margin-top: 20px;
-    transition: background 0.7s;
+    transition: background 0.3s;
 }
 
 .button:hover {
@@ -513,7 +639,7 @@ option {
 #sort {
     cursor: pointer;
     color: white;
-    transition: color 0.5s;
+    transition: color 0.3s;
 }
 
 #sort:hover {

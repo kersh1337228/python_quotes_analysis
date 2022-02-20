@@ -1,4 +1,6 @@
 from django.forms import *
+
+from quotes.models import Portfolio
 from .business_logic.utils import get_shares
 from .business_logic.analytics import *
 from .models import Strategy
@@ -7,13 +9,13 @@ from .models import Strategy
 '''User interface form, allowing to choose the share name, 
 beginning and ending date, strategy to use'''
 class UserInterface(Form):
-    share_name = CharField(
-        label='Share Name',
-        max_length=255,
+    portfolio = ModelChoiceField(
+        queryset=Portfolio.objects.all(),
+        to_field_name='slug',
+        label='Portfolio',
         error_messages={
-            'required': ('You have to choose the share name'),
-        },
-        widget=TextInput(attrs={'placeholder': 'Enter the share name'})
+            'required': ('You have to choose the portfolio'),
+        }, empty_label='(Choose the portfolio)',
     )
     time_interval_start = ChoiceField(
         label='Time Interval',
@@ -48,7 +50,6 @@ class UserInterface(Form):
     '''Making share select-box show the empty variant on get request'''
     def __init__(self, *args, **kwargs):
         super(UserInterface, self).__init__(*args, **kwargs)
-        self.base_fields['share_name'].initial = None
 
 
 '''Form to set up your own strategy'''

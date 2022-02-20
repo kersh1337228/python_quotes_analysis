@@ -5,14 +5,11 @@
 
 {% block content %}
     <div class="main_menu">
-{#        <form method="post" action="{% url 'main' %}" enctype="multipart/form-data">#}
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="form-error">{{ form.non_field_errors }}</div>
-            <h4><label class="form-label" for="{{ form.share_name.id_for_label }}">
-                {{ form.share_name.label }}:</label>
-            </h4>
-            {{ form.share_name }}
+            <div class="form_error">{{ form.non_field_errors }}</div>
+            <div class="form_error">{{ form.portfolio.errors }}</div>
+                {{ form.portfolio }}
         </form>
     </div>
 {% endblock %}

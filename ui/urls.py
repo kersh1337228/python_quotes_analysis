@@ -5,12 +5,12 @@ from .views import *
 urlpatterns = [
     path(
         'analysis/',
-        UIView.as_view(),
+        AnalysisAPIView.as_view(),
         name='main'
     ),
     path(
         'analysis/form/',
-        UIAPIView.as_view(),
+        AnalysisAPIView.as_view(),
         name='get_form'),
     path(
         'plot/',
@@ -19,7 +19,8 @@ urlpatterns = [
     path(
         'strategies/create/',
         CreateStrategyView.as_view(),
-        name='create_strategy'),
+        name='create_strategy'
+    ),
     path(
         'strategies/',
         ListOfStrategiesView.as_view(),

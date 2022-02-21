@@ -1,7 +1,6 @@
 from django.forms import *
 
 from quotes.models import Portfolio
-from .business_logic.utils import get_shares
 from .business_logic.analytics import *
 from .models import Strategy
 
@@ -15,28 +14,26 @@ class UserInterface(Form):
         label='Portfolio',
         error_messages={
             'required': ('You have to choose the portfolio'),
-        }, empty_label='(Choose the portfolio)',
+        }, empty_label='Choose the portfolio',
     )
     time_interval_start = ChoiceField(
         label='Time Interval',
-        choices=get_dates()['start'],
         error_messages={
             'required': ('You have to choose the first date of your time interval'),
         }
     )
     time_interval_end = ChoiceField(
         label='Time Interval',
-        choices=get_dates()['end'],
         error_messages={
             'required': ('You have to choose the last date of your time interval'),
         }
     )
-    strategy_name = ModelChoiceField(
+    strategy = ModelChoiceField(
         queryset=Strategy.objects.all(),
         label='Strategy',
         error_messages={
             'required': ('You have to choose the strategy'),
-        }, empty_label='(Choose the strategy)'
+        }, empty_label='Choose the strategy'
     )
     '''Custom validator for time interval'''
     def clean(self):

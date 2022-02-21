@@ -1,18 +1,54 @@
+import datetime
+
+from django.core.files import File
 from django.db.models import *
 from django.urls import reverse
+
 
 '''Strategy model, where strategy is basically what to do 
 when getting the 'good' and 'bad' analytics result,
 how much of shares can be in the briefcase at the same time and
 how much shares can we borrow'''
 class Strategy(Model):
-    name = CharField(max_length=255, verbose_name='Strategy name', unique=True)
-    shares_limit_high = PositiveSmallIntegerField(verbose_name='Shares amount limit to store')
-    shares_limit_low = SmallIntegerField(verbose_name='Shares amount limit to borrow')
-    buy = PositiveSmallIntegerField(verbose_name='Shares amount to buy if success')
-    sell = PositiveSmallIntegerField(verbose_name='Shares amount to sell if failure')
-    #url specifier
-    slug = SlugField(max_length=255, unique=True, db_index=True, verbose_name='URL')
+    name = CharField(
+        max_length=255,
+        verbose_name='Strategy name',
+        unique=True
+    )
+    shares_limit_high = PositiveSmallIntegerField(
+        verbose_name='Shares amount limit to store'
+    )
+    shares_limit_low = SmallIntegerField(
+        verbose_name='Shares amount limit to borrow'
+    )
+    buy = PositiveSmallIntegerField(
+        verbose_name='Shares amount to buy if success'
+    )
+    sell = PositiveSmallIntegerField(
+        verbose_name='Shares amount to sell if failure'
+    )
+    # url specifier
+    slug = SlugField(
+        max_length=255,
+        unique=True,
+        db_index=True,
+        verbose_name='URL'
+    )
+
+    def buy_or_sell(self, portfolio_image, share, date):
+        for quote in share.origin.quotes[date.strftime('%Y-%m-%d'):
+        (date + datetime.timedelta(days=3)).strftime('%Y-%m-%d')]:
+            current = share.origin.quotes[
+                (date + datetime.timedelta(days=3)).strftime('%Y-%m-%d')
+            ]['close']
+            if current > quote['close'] and self.amount + 1 <= self.shares_limit_high\
+                    and portfolio_image.balance >= current:
+                share.amount += 1
+                portfolio_image.balance -= current
+            elif current < quote['close'] and self.amount - 1 >= self.shares_limit_low:
+                share.amount -= 1
+                portfolio_image.balance += current
+
 
     '''Creating slug to use in strategy object url further,
     slug is based on strategy name'''
@@ -93,15 +129,20 @@ class Strategy(Model):
 created after pushing the analyze button and
 stores the data of the analysis'''
 class Log(Model):
-    plot = ImageField(upload_to='plots/%Y/%m/%d/%H/%M/%S')
-    share_delta_percent = FloatField(null=True)
-    share_delta_money = FloatField(null=True)
-    balance_delta_percent = FloatField(null=True)
-    balance_delta_money = FloatField(null=True)
-    strategy = ForeignKey('Strategy', on_delete=CASCADE)
-    share = CharField(max_length=255)
     time_interval_start = DateField()
     time_interval_end = DateField()
+    price_deltas = JSONField()
+    strategy = ForeignKey(
+        'Strategy',
+        on_delete=CASCADE
+    )
+    balance_plot = ImageField(
+        upload_to='plots/%Y/%m/%d/%H/%M/%S'
+    )
+    share_plots = ManyToManyField(
+        'Image',
+        related_name='log_share_plots',
+    )
 
     '''Says whether the analytics result is bad(-), normal(0) or good(+)'''
     def get_result(self):
@@ -114,3 +155,15 @@ class Log(Model):
 
     def __str__(self):
         return str(self.pk)
+
+
+class Image(Model):
+    image = ImageField(
+        upload_to='plots/%Y/%m/%d/%H/%M/%S'
+    )
+    def attach_image(self, filename):
+        self.image.save(
+            filename,
+            File(open(f'ui/business_logic/{filename}', 'rb'))
+        )
+        self.save()

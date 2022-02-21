@@ -3,23 +3,6 @@ $(document).ready(function () {
     function get_csrf () {
         return document.cookie.match(/csrftoken=([\w]+)[;]?/)[1]
     }
-    // // Parsing form selection data on form select
-    // $('select').on('change', function () {
-    //     $.ajax({
-    //         url: `${window.location.origin}/analysis/form/`,
-    //         type: 'GET',
-    //         data: {
-    //             share_name: $(this).val(),
-    //             step: $(this).attr('id')
-    //         },
-    //         success: function (response) {
-    //
-    //         },
-    //         error: function (response) {
-    //             alert('error')
-    //         }
-    //     })
-    // })
     $('.content').on('input paste', '#id_share_name', function () {
         search_input = $(this)
         $.ajax({
@@ -64,7 +47,7 @@ $(document).ready(function () {
         $(this).parent().trigger('submit')
     })
 
-    $('.content').on('submit', 'form', function (event) {
+    $('.content').on('submit', '.portfolio_create_form form', function (event) {
         event.preventDefault()
         let data = new FormData($(this)[0])
         $.ajax({
@@ -219,28 +202,15 @@ $(document).ready(function () {
         })
     })
     function quotes_colors() {
-        try {
-            for (i in $('.quotes_change')) {
-                let change = $($('.quotes_change')[i])
-                if (change.text().startsWith('-')) {
-                    change.css('color', 'rgb(171, 92, 92)')
-                } else if (change.text().startsWith('+')) {
-                    change.css('color', 'rgb(92, 171, 50)')
-                } else if (change.text() !== 'Change $') {
-                    change.css('color', 'rgb(219,168,0)')
-                }
+        $('.quotes_change, .quotes_changep').each((index, element) => {
+            if ($(element).text().startsWith('-')) {
+                $(element).css('color', 'rgb(171, 92, 92)')
+            } else if ($(element).text().startsWith('+')) {
+                $(element).css('color', 'rgb(92, 171, 50)')
+            } else if ($(element).text() !== 'Change $' && $(element).text() !== 'Change %') {
+                $(element).css('color', 'rgb(219,168,0)')
             }
-            for (i in $('.quotes_changep')) {
-                let change = $($('.quotes_changep')[i])
-                if (change.text().startsWith('-')) {
-                    change.css('color', 'rgb(171, 92, 92)')
-                } else if (change.text().startsWith('+')) {
-                    change.css('color', 'rgb(92, 171, 50)')
-                } else if (change.text() !== 'Change %') {
-                    change.css('color', 'rgb(219,168,0)')
-                }
-            }
-        } catch (error) {}
+        })
     }
     quotes_colors()
     // Quotes list search
@@ -403,6 +373,7 @@ $(document).ready(function () {
     //
     // Analysis
     //
+    // Step 1: choosing portfolio
     $('.content').on('change', '#id_portfolio', function() {
         if ($(this).val()) {
             $.ajax({
@@ -415,7 +386,7 @@ $(document).ready(function () {
                 success: function (response) {
                     $('.errorlist').remove()
                     $('#id_portfolio').after(`
-                        <select id="id_time_interval_start"></select>
+                        <select id="id_time_interval_start" name="time_interval_start"></select>
                     `)
                     response.dates.forEach(
                         (date) => {
@@ -431,10 +402,68 @@ $(document).ready(function () {
                             <li>${response.responseJSON.error_message}</li>
                         </ul>
                     `)
+                    $('#id_time_interval_start, #id_time_interval_end, #strategy_name').remove()
                 }
             })
         } else {
             $('#id_time_interval_start, #id_time_interval_end, #strategy_name').remove()
         }
+    })
+    // Step 2: choosing the analysis interval start
+    $('.content').on('change', '#id_time_interval_start', function() {
+        $('#id_time_interval_end').remove()
+        $(this).after(`
+            <select id="id_time_interval_end" name="time_interval_end"></select>
+        `)
+        $('#id_time_interval_start option').slice(4).each((index, option) => {
+            $('#id_time_interval_end').append(option)
+        })
+    })
+    // Step 3: choosing the analysis interval end
+    $('.content').on('change', '#id_time_interval_end', function() {
+        $.ajax({
+            url: `${window.location.origin}/analysis/form/`,
+            type: 'GET',
+            data: {
+                step: 'strategies',
+            },
+            success: function (response) {
+                $('#id_time_interval_end').after(`
+                    <select id="id_strategy" name="strategy"></select>
+                `)
+                $('#id_strategy_name').append(`
+                    <option>Choose the strategy</option>
+                `)
+                response.strategies.forEach((strategy) => {
+                    $('#id_strategy_name').append(`
+                        <option value="${strategy.slug}">${strategy.name}</option>
+                    `)
+                })
+            },
+            error: function (response) {}
+        })
+    })
+    // Step 4: choosing the strategy to analyse
+    $('.content').on('change', '#id_strategy', function() {
+        $(this).after(`<div class="button_div" id="analysis_button">Analyse</div>`)
+    })
+    // Step 5: analysis
+    $('.content').on('click', '#analysis_button', function() {
+        $(this).parent().trigger('submit')
+        // let data = new FormData($(this)[0])
+        // $.ajax({
+        //         url: `${window.location.origin}/analysis/form/`,
+        //         type: 'POST',
+        //         processData: false,
+        //         contentType: false,
+        //         data: {
+        //
+        //         },
+        //         success: function (response) {
+        //
+        //         },
+        //         error: function (response) {
+        //         }
+        //     })
     })
 })

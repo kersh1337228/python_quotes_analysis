@@ -1,19 +1,13 @@
-from django.core.files import File
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import FormView, CreateView, DetailView, ListView, DeleteView
+from django.views.generic import CreateView, DetailView, ListView, DeleteView
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
-
-from quotes.models import Quote
-from .business_logic.analytics import main
-from .business_logic.data_parser import quote_name_search
 from .forms import *
 from .models import *
-from .utils import parse_json
 
 
-class UIAPIView(
+class AnalysisAPIView(
     CreateAPIView,
     RetrieveUpdateDestroyAPIView
 ):
@@ -28,13 +22,22 @@ class UIAPIView(
                         data={
                             'error_message': 'No shares in the portfolio'
                         },
-                        status=400
+                        status=400,
                     )
                 return Response(
                     data={
                         'dates': portfolio.get_quotes_dates()
                     },
-                    status=200
+                    status=200,
+                )
+            elif request.query_params.get('step') == 'strategies':
+                return Response(
+                    data={
+                        'strategies': [
+                            model_to_dict(strategy) for strategy in Strategy.objects.all()
+                        ]
+                    },
+                    status=200,
                 )
         else:
             return render(
@@ -44,7 +47,19 @@ class UIAPIView(
             )
 
     def post(self, request, *args, **kwargs):
-        pass
+        if request.is_ajax():
+            pass
+        else:
+            analyse(
+                Portfolio.objects.get(
+                    slug=request.data.get('portfolio')
+                ),
+                request.data.get('time_interval_start'),
+                request.data.get('time_interval_end'),
+                Strategy.objects.get(
+                    slug=request.data.get('strategy')
+                )
+            )
 
     def put(self, request, *args, **kwargs):
         pass
@@ -54,31 +69,6 @@ class UIAPIView(
 
     def delete(self, request, *args, **kwargs):
         pass
-
-
-'''User interface view, calling the 
-analytics function if form is valid'''
-class UIView(FormView):
-    template_name = 'main.html'
-    form_class = UserInterface
-    main_result = {}
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data()
-        context['title'] = 'Main Menu'
-        return context
-
-
-    '''Form validation with post request'''
-    def form_valid(self, form):
-        form_data = form.data
-        time_interval = {
-            'start': form_data['time_interval_start'],
-            'end': form_data['time_interval_end'],
-        }
-        self.main_result = main(form_data['share_name'], time_interval,
-                           Strategy.objects.get(pk=int(form_data['strategy_name'])).get_params())
-        return super(UIView, self).form_valid(form)
 
     '''Redirecting if form is validated successfully'''
     def get_success_url(self):

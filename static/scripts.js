@@ -34,12 +34,12 @@ $(document).ready(function () {
         })
     })
 
-    $('.button_div').on('click', function (){
-        form = $(this).parent().children('.form')
+    $('#portfolio_add_button').on('click', function (){
+        form = $(this).parent().children('.portfolio_create_form')
         if (form.css('display') === 'none') {
-            $(this).parent().children('.form').show(300)
+            form.show(300)
         } else {
-            $(this).parent().children('.form').hide(300)
+            form.hide(300)
         }
     })
 
@@ -374,7 +374,7 @@ $(document).ready(function () {
     // Analysis
     //
     // Step 1: choosing portfolio
-    $('.content').on('change', '#id_portfolio', function() {
+    $('.content').on('change', '#id_portfolio', function(event) {
         if ($(this).val()) {
             $.ajax({
                 url: `${window.location.origin}/analysis/form/`,
@@ -384,7 +384,9 @@ $(document).ready(function () {
                     slug: $(this).val(),
                 },
                 success: function (response) {
+                    console.log(response)
                     $('.errorlist').remove()
+                    $('#id_time_interval_start, #id_time_interval_end, #strategy_name').remove()
                     $('#id_portfolio').after(`
                         <select id="id_time_interval_start" name="time_interval_start"></select>
                     `)
@@ -415,8 +417,12 @@ $(document).ready(function () {
         $(this).after(`
             <select id="id_time_interval_end" name="time_interval_end"></select>
         `)
-        $('#id_time_interval_start option').slice(4).each((index, option) => {
-            $('#id_time_interval_end').append(option)
+        $('#id_time_interval_start option').slice(
+            $('#id_time_interval_start option:selected').index() + 4
+        ).each((index, option) => {
+            $('#id_time_interval_end').append(`
+                <option value="${$(option).val()}">${$(option).val()}</option>
+            `)
         })
     })
     // Step 3: choosing the analysis interval end
@@ -428,14 +434,15 @@ $(document).ready(function () {
                 step: 'strategies',
             },
             success: function (response) {
+                $('#id_strategy').remove()
                 $('#id_time_interval_end').after(`
                     <select id="id_strategy" name="strategy"></select>
                 `)
-                $('#id_strategy_name').append(`
+                $('#id_strategy').append(`
                     <option>Choose the strategy</option>
                 `)
                 response.strategies.forEach((strategy) => {
-                    $('#id_strategy_name').append(`
+                    $('#id_strategy').append(`
                         <option value="${strategy.slug}">${strategy.name}</option>
                     `)
                 })
@@ -445,25 +452,11 @@ $(document).ready(function () {
     })
     // Step 4: choosing the strategy to analyse
     $('.content').on('change', '#id_strategy', function() {
+        $('#analysis_button').remove()
         $(this).after(`<div class="button_div" id="analysis_button">Analyse</div>`)
     })
     // Step 5: analysis
     $('.content').on('click', '#analysis_button', function() {
         $(this).parent().trigger('submit')
-        // let data = new FormData($(this)[0])
-        // $.ajax({
-        //         url: `${window.location.origin}/analysis/form/`,
-        //         type: 'POST',
-        //         processData: false,
-        //         contentType: false,
-        //         data: {
-        //
-        //         },
-        //         success: function (response) {
-        //
-        //         },
-        //         error: function (response) {
-        //         }
-        //     })
     })
 })

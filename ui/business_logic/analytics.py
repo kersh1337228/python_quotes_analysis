@@ -7,10 +7,12 @@ import matplotlib.gridspec as grd
 import matplotlib.dates as mdates
 import mplfinance
 from django.core.files import File
-
 from ui.models import Log, Image
 
 
+'''Copies the portfolio and share to allow the analyser
+ function to change the data of the class 
+ instance but not of the database'''
 class Portfolio_Image:
     class Share_Image:
         def __init__(self, share):
@@ -22,8 +24,27 @@ class Portfolio_Image:
         self.shares = [
             self.Share_Image(share) for share in portfolio.shares.all()
         ]
+        self.cost = self.balance
+
+    def set_cost(self, date):
+        cost = self.balance
+        for share in self.shares:
+            cost += share.amount * share.origin.quotes[date]['close']
+        self.cost = cost
+
+    def __str__(self):
+        return str({
+            'balance': self.balance,
+            'shares': [{
+                'amount': share.amount,
+                'name': share.origin.name
+            } for share in self.shares],
+            'cost': self.cost
+        })
 
 
+'''Analyser function, made to analyse the
+ quotes data using different strategies'''
 def analyse(portfolio, time_interval_start, time_interval_end, strategy):
     date_range = pandas.date_range(
         datetime.datetime.strptime(
@@ -45,25 +66,22 @@ def analyse(portfolio, time_interval_start, time_interval_end, strategy):
         time_interval_end=time_interval_end,
         price_deltas={
             'balance': {
-                'percent': (logs[-1].balance / logs[0].balance - 1) * 100,
-                'currency': round(logs[-1].balance - logs[0].balance, 2)
+                'percent': (logs[-1].cost / logs[0].cost - 1) * 100,
+                'currency': round(logs[-1].cost - logs[0].cost, 2)
             },
             'shares': [
                 {
-                    'percent': (share.origin.quotes[list(
-                        share.origin.quotes.keys()
-                    )[-1]]['close'] / share.origin.quotes[list(
-                        share.origin.quotes.keys()
-                    )[-1]]['close'] - 1) * 100,
-                    'currency': round(share.origin.quotes[list(
-                        share.origin.quotes.keys()
-                    )[-1]]['close'] - share.origin.quotes[list(
-                        share.origin.quotes.keys()
-                    )[-1]]['close'], 2)
+                    'percent': (share.origin.quotes[time_interval_start]['close'] /
+                                share.origin.quotes[time_interval_end]['close'] - 1) * 100,
+                    'currency': round(
+                        share.origin.quotes[time_interval_start]['close'] -
+                        share.origin.quotes[time_interval_end]['close'], 2
+                    )
                 }
-                for share in portfolio.shares]
+                for share in portfolio.shares.all()]
         },
         strategy=strategy,
+        portfolio=portfolio,
     ) # Creating log model instance to save analysis data
     plot_builder(
         portfolio,
@@ -74,27 +92,40 @@ def analyse(portfolio, time_interval_start, time_interval_end, strategy):
         'balance.png',
         File(open('ui/business_logic/balance.png', 'rb'))
     ) # Attaching balance change plot to log model instance
-    for share in portfolio.shares:
+    for share in portfolio.shares.all():
         build_candle_plot( # Building share price ohlc candle plot
-            {date.strftime('%Y-%m-%d'): share.origin.quotes[
-                date.strftime('%Y-%m-%d')
-            ] for date in date_range},
+            {date: share.origin.quotes[date] for date in get_date_range(
+                share.origin.quotes, time_interval_start, time_interval_end
+            )},
             f'{share.origin.name}.png'
         ) # Attaching share price plot to log model instance
         image = Image.objects.create()
         image.attach_image(f'{share.origin.name}.png')
+        log_instance.share_plots.add(image)
     log_instance.save() # Applying log model instance changes
     portfolio.logs.add(log_instance) # Attaching log to the portfolio
+    portfolio.save()
+    return log_instance
 
 
+def get_date_range(quotes, time_interval_start, time_interval_end):
+    return [date for date in quotes.keys() if datetime.datetime.strptime(date, '%Y-%m-%d') >=
+            datetime.datetime.strptime(time_interval_start, '%Y-%m-%d') and
+            datetime.datetime.strptime(date, '%Y-%m-%d') <=
+            datetime.datetime.strptime(time_interval_end, '%Y-%m-%d')]
+
+
+'''Log function uses the strategy to analyse
+ the portfolio on the chosen time period'''
 def log(portfolio_image, date_range, strategy):
     # Taking class instance copy for further work with the original one,
     # not being afraid to change logged data
     logs = [deepcopy(portfolio_image)]
-    for share in portfolio_image.shares:
-        for date in date_range:
-            strategy.buy_or_sell(portfolio_image, share, date)
-            logs.append(deepcopy(portfolio_image))
+    for date in date_range:
+        for index in range(len(portfolio_image.shares)):
+            portfolio_image = strategy.buy_or_sell(portfolio_image, index, date)
+            print(portfolio_image)
+        logs.append(deepcopy(portfolio_image))
     return logs
 
 
@@ -102,8 +133,8 @@ def log(portfolio_image, date_range, strategy):
 shares average_cost, depending on the time point'''
 def plot_builder(portfolio, date_range, logs):
     # x-axis data (dates)
-    dates_data = mdates.date2num(pandas.DatetimeIndex(
-        date_range
+    dates_data = mdates.date2num(date_range.insert(
+            0, date_range[0] - datetime.timedelta(days=1)
     ).to_pydatetime())
     # Creating balance and shares amount figures and subplots
     fig = plt.figure()
@@ -117,24 +148,25 @@ def plot_builder(portfolio, date_range, logs):
         mdates.DateFormatter('%Y-%m-%d')
     )
     shares_amount_subplot.xaxis.set_major_locator(
-        mdates.MonthLocator(bymonth=(1, 13))
+        mdates.DayLocator(interval=((date_range[-1] - date_range[0]).days // 6))
     )
     shares_amount_subplot.xaxis.set_minor_locator(
-        mdates.MonthLocator()
+        mdates.DayLocator()
     )
     for label in shares_amount_subplot.get_xticklabels(which='major'):
         label.set(rotation=45, horizontalalignment='right')
     # Getting subplot lines
     balance_line = balance_subplot.plot(
         dates_data,
-        numpy.array([log.balance for log in logs]),
-        label='Balance'
+        numpy.array([log.cost for log in logs]),
+        label='Balance',
+        color='r'
     )
     shares_lines = [shares_amount_subplot.plot(
         dates_data,
-        numpy.array([log.shares[i].amount for log in logs]),
-        label=f'{portfolio.shares[i].origin.name}'
-    ) for i in range(len(portfolio.shares))]
+        numpy.array([log.shares[index].amount for log in logs]),
+        label=f'{portfolio.shares.all()[index].origin.name}'
+    )[0] for index, share in enumerate(portfolio.shares.all())]
     # Setting vertical axes labels
     balance_subplot.set_ylabel('Balance')
     shares_amount_subplot.set_ylabel('Amount')
@@ -184,14 +216,15 @@ def plot_builder(portfolio, date_range, logs):
     plt.close()
 
 
+'''Building quotes ohlc candle plot'''
 def build_candle_plot(quotes, filename='plot.png'):
     # Formatting data
     data = pandas.DataFrame({
-        'Open': [value['open'] for value in quotes.values()],
-        'High': [value['high'] for value in quotes.values()],
-        'Low': [value['low'] for value in quotes.values()],
-        'Close': [value['close'] for value in quotes.values()],
-        'Volume': [value['volume'] for value in quotes.values()],
+        'Open': [value['open'] for value in list(quotes.values())[::-1]],
+        'High': [value['high'] for value in list(quotes.values())[::-1]],
+        'Low': [value['low'] for value in list(quotes.values())[::-1]],
+        'Close': [value['close'] for value in list(quotes.values())[::-1]],
+        'Volume': [value['volume'] for value in list(quotes.values())[::-1]],
     }, index=pandas.DatetimeIndex(quotes.keys()))
     # Creating and customising plot
     plot, axes = mplfinance.plot(
@@ -211,108 +244,3 @@ def build_candle_plot(quotes, filename='plot.png'):
         axe.tick_params(labelcolor='#838d9b')
         axe.set_ylabel(axe.get_ylabel(), color='#838d9b')
     plot.savefig(f'ui/business_logic/{filename}', dpi=1200)
-
-
-# # Creating the first plot
-#     cost_plot = plt.subplot(2, 1, 1)
-#     cost_plot.set_title('Share cost', color='w')
-#     dats = pandas.to_datetime(time).to_series().apply(matplotlib.dates.date2num)
-#     candlestick_ohlc(cost_plot, zip(dats, [point['open'] for point in points],
-#                                     [point['high'] for point in points],
-#                                     [point['low'] for point in points],
-#                                     [point['close'] for point in points]),
-#                      width=1, colorup='g', colordown='r'
-#                      )
-#
-#     # Setting x-axis data as formatted date
-#     plt.gca().xaxis.set_visible(False)
-#
-#     # Setting axis labels
-#     plt.xlabel('Date')
-#     plt.ylabel('RUB')
-#
-#     # Setting plot dark color-scheme
-#     plt.gca().set_facecolor((0.086, 0.086, 0.086))
-#     cost_plot.spines['bottom'].set_color('w')
-#     cost_plot.spines['top'].set_color('w')
-#     cost_plot.spines['left'].set_color('w')
-#     cost_plot.spines['right'].set_color('w')
-#     cost_plot.xaxis.label.set_color('w')
-#     cost_plot.yaxis.label.set_color('w')
-#     cost_plot.tick_params(axis='x', colors='w')
-#     cost_plot.tick_params(axis='y', colors='w')
-#
-#     # Creating the second plot
-#     money_plot = plt.subplot(2, 1, 2)
-#     plt.plot(time, money, '-', color='r')
-#     money_plot.set_title('Balance', color='w')
-#
-#     plt.gca().xaxis.set_visible(False)
-#
-#     plt.xlabel('Time interval')
-#     plt.ylabel('RUB')
-#
-#     # Recoloring plot (dark theme)
-#     plt.gca().set_facecolor((0.086, 0.086, 0.086))
-#     money_plot.spines['bottom'].set_color('w')
-#     money_plot.spines['top'].set_color('w')
-#     money_plot.spines['left'].set_color('w')
-#     money_plot.spines['right'].set_color('w')
-#     money_plot.xaxis.label.set_color('w')
-#     money_plot.yaxis.label.set_color('w')
-#     money_plot.tick_params(axis='x', colors='w')
-#     money_plot.tick_params(axis='y', colors='w')
-#     fig = plt.figure(1)
-#     fig.patch.set_facecolor((0.086, 0.086, 0.086))
-#
-#     # Saving the obtained plot
-#     plt.savefig('ui/static/plots/plot.png')
-#     plt.close()
-
-
-# '''The main-hub function'''
-# def main(raw_filename, time_interval, raw_strategy):
-#
-#     # Initializing data
-#     strategy = raw_strategy
-#     filename = get_filename(raw_filename)
-#     points = get_points(filename)
-#     logs = briefcase_logging(points, strategy)
-#
-#     # Getting the dates list
-#     dates = [point['date'] for point in points]
-#
-#     # Initializing data to build plot
-#     start_date = datetime.date(*list(map(int, time_interval['start'].split('-'))))
-#     end_date = datetime.date(*list(map(int, time_interval['end'].split('-'))))
-#     start_index, end_index = get_date_indexes(start_date, end_date, dates)
-#     time = numpy.array(dates[3:][start_index:end_index + 1])
-#     logs = logs[start_index:end_index + 1]
-#     cost = numpy.array([i.cost for i in logs])
-#     money = numpy.array([i.liquidation_savings() for i in logs])
-#
-#     plot_builder(time, cost, points, money)
-#
-#     share_delta_percent = logs[-1].cost / logs[0].cost - 1
-#     share_delta_money = round(logs[-1].cost - logs[0].cost, 2)
-#     balance_delta_percent = (logs[-1].liquidation_savings() / logs[0].liquidation_savings() - 1)
-#     balance_delta_money = round(logs[-1].liquidation_savings() - logs[0].liquidation_savings(), 2)
-#
-#     return {
-#         'share_delta': {
-#             'share_delta_percent': share_delta_percent,
-#             'share_delta_money': share_delta_money,
-#         },
-#         'balance_delta': {
-#             'balance_delta_percent': balance_delta_percent,
-#             'balance_delta_money': balance_delta_money,
-#         },
-#         'strategy_name': raw_strategy['name'],
-#         'share_name': filename.split('/')[-1][:-4].capitalize(),
-#         'time_interval_start': dates[0],
-#         'time_interval_end': dates[-1],
-#     }
-
-
-# if __name__ == '__main__':
-#     plot_builder()

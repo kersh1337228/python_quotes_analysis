@@ -1,5 +1,6 @@
-from django.urls import path, include
-from .views import *
+from django.urls import path
+from .views import AnalysisAPIView, CreateStrategyView, ListOfStrategiesView,\
+    SingleStrategyView, DeleteStrategyView, ListOfLogsView, LogAPIView
 
 
 urlpatterns = [
@@ -11,11 +12,8 @@ urlpatterns = [
     path(
         'analysis/form/',
         AnalysisAPIView.as_view(),
-        name='get_form'),
-    path(
-        'plot/',
-        plot_view,
-        name='plot'),
+        name='get_form'
+    ),
     path(
         'strategies/create/',
         CreateStrategyView.as_view(),
@@ -24,25 +22,36 @@ urlpatterns = [
     path(
         'strategies/',
         ListOfStrategiesView.as_view(),
-        name='strategies'),
+        name='strategies'
+    ),
     path(
         'strategies/sortby/<slug:sortby>',
         ListOfStrategiesView.as_view(),
-        name='strategies_sortby'),
+        name='strategies_sortby'
+    ),
     path(
         'strategies/<slug:slug>',
         SingleStrategyView.as_view(),
-        name='strategy'),
+        name='strategy'
+    ),
     path(
         'strategies/delete/<slug:slug>',
         DeleteStrategyView.as_view(),
-        name='delete_strategy'),
+        name='delete_strategy'
+    ),
     path(
-        'logs/',
+        'logs/list/',
         ListOfLogsView.as_view(),
-        name='logs'),
+        name='logs_list'
+    ),
     path(
-        'logs/delete/<int:pk>',
-        DeleteLogView.as_view(),
-        name='delete_log'),
+        'logs/detail/<slug:slug>/',
+        LogAPIView.as_view(),
+        name='logs_detail'
+    ),
+    path(
+        'logs/delete/',
+        LogAPIView.as_view(),
+        name='logs_delete'
+    ),
 ]

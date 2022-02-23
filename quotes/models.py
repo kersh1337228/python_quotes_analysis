@@ -1,11 +1,11 @@
 import datetime
+import pandas
 from alpha_vantage.timeseries import TimeSeries
 from django.core.files import File
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from ui.business_logic.analytics import build_candle_plot
 from ui.models import Log
-import pandas
 
 
 api_key = 'J7JRRVLFS9HZFPBY'
@@ -46,16 +46,16 @@ class Portfolio(models.Model):
     )
 
     def get_quotes_dates(self):
-        return (pandas.date_range(
+        return pandas.date_range(
             max([datetime.datetime.strptime(
-                list(share.origin.quotes.keys())[-1],
+                list(share.origin.quotes.keys())[0],
                 '%Y-%m-%d'
             ) for share in self.shares.all()]),
             min([datetime.datetime.strptime(
-                list(share.origin.quotes.keys())[0],
+                list(share.origin.quotes.keys())[-1],
                 '%Y-%m-%d'
             ) for share in self.shares.all()])
-        )).strftime('%Y-%m-%d').tolist()
+        ).strftime('%Y-%m-%d').tolist()
 
 
     def __str__(self):
@@ -94,17 +94,28 @@ class Quote(models.Model):
         # Parsing quotes data
         time_series = TimeSeries(key=api_key, output_format='json')
         (data, meta_data) = time_series.get_daily(symbol=symbol, outputsize='full')
+        # Formatting quotes
+        quotes = last = {}
+        for date in pandas.date_range(
+            start=datetime.datetime.strptime(list(data.keys())[-1], '%Y-%m-%d'),
+            end=datetime.datetime.strptime(list(data.keys())[0], '%Y-%m-%d'),
+            freq='D'
+        ):
+            key = date.strftime('%Y-%m-%d')
+            if data.get(key, None):
+                last = {
+                    'open': float(data[key]['1. open']),
+                    'high': float(data[key]['2. high']),
+                    'low': float(data[key]['3. low']),
+                    'close': float(data[key]['4. close']),
+                    'volume': float(data[key]['5. volume'])
+                }
+            quotes[key] = last
         # Adding quotes data to the database
         quote = Quote.objects.create(
             symbol=symbol,
             name=name,
-            quotes={key: {
-                'open': float(data[key]['1. open']),
-                'high': float(data[key]['2. high']),
-                'low': float(data[key]['3. low']),
-                'close': float(data[key]['4. close']),
-                'volume': float(data[key]['5. volume'])
-            } for key in data},
+            quotes=quotes,
             slug=slug
         )
         quote.build_price_plot()

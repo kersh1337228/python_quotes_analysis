@@ -1,14 +1,11 @@
 import datetime
-
-from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms import model_to_dict
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from rest_framework.generics import CreateAPIView,\
     RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.response import Response
-
 from ui.business_logic.data_parser import get_all_quotes, quote_name_search, paginate
 from .forms import PortfolioCreateForm
 from .models import Portfolio, Share, Quote
@@ -210,12 +207,12 @@ class QuotesAPIView(
             quote = Quote.objects.get(
                 slug=kwargs.get('slug')
             )
-            quotes = quote.quotes[list(quote.quotes.keys())[0]]
+            quotes = quote.quotes[list(quote.quotes.keys())[-1]]
             return render(
                 request=request,
                 template_name='quotes_detail.html',
                 context={'quote': quote, 'quotes': {
-                    'date': list(quote.quotes.keys())[0],
+                    'date': list(quote.quotes.keys())[-1],
                     'open': quotes['open'],
                     'high': quotes['high'],
                     'low': quotes['low'],

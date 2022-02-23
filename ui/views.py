@@ -1,18 +1,24 @@
-from django.shortcuts import render
+from django.forms import model_to_dict
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, DeleteView
-from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.response import Response
-from .forms import *
-from .models import *
+from .business_logic.analytics import analyse
+from .forms import CreateStrategyForm, UserInterface
+from .models import Strategy, Log
+from quotes.models import Portfolio
 
 
 class AnalysisAPIView(
     CreateAPIView,
     RetrieveUpdateDestroyAPIView
 ):
+    # Analysis page get request, returns the form fields
+    # step by step, depending on the previous choices
     def get(self, request, *args, **kwargs):
         if request.is_ajax():
+            # Choosing the portfolio
             if request.query_params.get('step') == 'portfolio':
                 portfolio = Portfolio.objects.get(
                     slug=request.query_params.get('slug')
@@ -30,6 +36,7 @@ class AnalysisAPIView(
                     },
                     status=200,
                 )
+            # Choosing the time interval end date
             elif request.query_params.get('step') == 'strategies':
                 return Response(
                     data={
@@ -46,11 +53,12 @@ class AnalysisAPIView(
                  'form': UserInterface}
             )
 
+    # Getting form data and analysing them
     def post(self, request, *args, **kwargs):
         if request.is_ajax():
             pass
         else:
-            analyse(
+            log = analyse(
                 Portfolio.objects.get(
                     slug=request.data.get('portfolio')
                 ),
@@ -59,6 +67,10 @@ class AnalysisAPIView(
                 Strategy.objects.get(
                     slug=request.data.get('strategy')
                 )
+            )
+            return redirect(
+                'logs_detail',
+                slug=log.slug,
             )
 
     def put(self, request, *args, **kwargs):
@@ -73,6 +85,48 @@ class AnalysisAPIView(
     '''Redirecting if form is validated successfully'''
     def get_success_url(self):
         return reverse_lazy('plot')
+
+
+class LogAPIView(RetrieveUpdateDestroyAPIView):
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            pass
+        else:
+            return render(
+                template_name='log_detail.html',
+                context={
+                    'log': Log.objects.get(
+                        slug=kwargs.get('slug')
+                    )
+                },
+                request=request
+            )
+
+    def delete(self, request, *args, **kwargs):
+        if request.is_ajax():
+            Log.objects.get(
+                slug=request.data.get('slug')
+            ).delete()
+            return Response(
+                data={},
+                status=200,
+            )
+        else:
+            pass
+
+
+class LogListAPIView(ListAPIView):
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            pass
+        else:
+            return render(
+                template_name='log_list.html',
+                context={
+                    'logs': Log.objects.all(),
+                },
+                request=request
+            )
 
 
 '''Creating your own set up strategy,
@@ -144,7 +198,7 @@ class DeleteStrategyView(DeleteView):
 Logs are automatically created while doing analytics'''
 class ListOfLogsView(ListView):
     model = Log
-    template_name = 'logs.html'
+    template_name = 'log_list.html'
     context_object_name = 'logs'
     extra_context = {'title': 'Logs'}
 
@@ -159,38 +213,6 @@ class DeleteLogView(DeleteView):
     context_object_name = 'log'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('logs')
-
-
-'''Plot view, which is shown after the analytics is finished'''
-def plot_view(request):
-    global main_result
-    context = {
-        'title': 'Plot',
-        'share_delta_percent': round(main_result['share_delta']['share_delta_percent'] * 100, 2),
-        'share_delta_money': main_result['share_delta']['share_delta_money'],
-        'balance_delta_percent': round(main_result['balance_delta']['balance_delta_percent'] * 100, 2),
-        'balance_delta_money': main_result['balance_delta']['balance_delta_money'],
-        'time_interval_start': main_result['time_interval_start'],
-        'time_interval_end': main_result['time_interval_end'],
-        'share_name': main_result['share_name']
-    }
-    if context['share_delta_percent'] == 0 and context['balance_delta_percent'] == 0:
-        context['no_data'] = True
-        return render(request, 'plot.html', context)
-    '''Creating new log connected to a certain strategy'''
-    log = Log.objects.create(
-        share_delta_percent=context['share_delta_percent'],
-        share_delta_money=context['share_delta_money'],
-        balance_delta_percent=context['balance_delta_percent'],
-        balance_delta_money=context['balance_delta_money'],
-        strategy=Strategy.objects.get(name=main_result['strategy_name']),
-        share=context['share_name'],
-        time_interval_start=context['time_interval_start'],
-        time_interval_end=context['time_interval_end'],
-    )
-    log.plot.save('plot.png', File(open('ui/static/plots/plot.png', 'rb')), save=True)
-    log.save()
-    return render(request, 'plot.html', context)
 
 
 '''Error 404 handler'''

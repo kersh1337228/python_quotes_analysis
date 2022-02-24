@@ -1,7 +1,6 @@
 import datetime
 from django.core.files import File
 from django.db import models
-from django.urls import reverse
 
 
 '''Strategy model, where strategy is basically what to do 
@@ -14,17 +13,11 @@ class Strategy(models.Model):
         verbose_name='Strategy name',
         unique=True
     )
-    shares_limit_high = models.PositiveSmallIntegerField(
+    long_limit = models.PositiveSmallIntegerField(
         verbose_name='Shares amount limit to store'
     )
-    shares_limit_low = models.SmallIntegerField(
+    short_limit = models.SmallIntegerField(
         verbose_name='Shares amount limit to borrow'
-    )
-    buy = models.PositiveSmallIntegerField(
-        verbose_name='Shares amount to buy if success'
-    )
-    sell = models.PositiveSmallIntegerField(
-        verbose_name='Shares amount to sell if failure'
     )
     slug = models.SlugField(
         max_length=255,
@@ -41,30 +34,43 @@ class Strategy(models.Model):
             current = portfolio_image.shares[index].origin.quotes[
                 (date + datetime.timedelta(days=3)).strftime('%Y-%m-%d')
             ]['close']
-            if current > quote and portfolio_image.shares[index].amount + 1 <= self.shares_limit_high\
+            if current > quote and portfolio_image.shares[index].amount + 1 <= self.long_limit\
                     and portfolio_image.balance >= current:
                 portfolio_image.shares[index].amount += 1
                 portfolio_image.balance -= current
-            elif current < quote and portfolio_image.shares[index].amount - 1 >= self.shares_limit_low:
+            elif current < quote and portfolio_image.shares[index].amount - 1 >= self.short_limit:
                 portfolio_image.shares[index].amount -= 1
                 portfolio_image.balance += current
         portfolio_image.set_cost((date + datetime.timedelta(days=3)).strftime('%Y-%m-%d'))
         return portfolio_image
 
+    def get_results(self):
+        logs = Log.objects.filter(
+            strategy=self
+        )
+        if logs:
+            success = 0
+            for log in logs:
+                success = success + 1 \
+                    if log.price_deltas['balance']['currency'] >= 0 \
+                    else success
+            return {
+                'success': {
+                    'amount': success,
+                    'percent': round(success / len(logs), 2) * 100,
+                },
+                'fail': {
+                    'amount': len(logs) - success,
+                    'percent': round(1 - success / len(logs), 2) * 100,
+                }
+            }
+        else:
+            return None
 
-    '''Creating slug to use in strategy object url further,
-    slug is based on strategy name'''
     def save(self, **kwargs):
         if not self.slug or self.slug != self.name.replace(' ', '_').lower():
             self.slug = self.name.replace(' ', '_').lower()
         super(Strategy, self).save()
-
-    '''Getting strategy object absolute url, based on its slug, created before'''
-    def get_absolute_url(self):
-        return reverse('strategy', kwargs={'slug': self.slug})
-
-    def __str__(self):
-        return self.name
 
 
 '''Log class with user analytics log,

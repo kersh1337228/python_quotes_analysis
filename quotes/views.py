@@ -72,7 +72,7 @@ class PortfolioAPIView(
             data.pop('csrfmiddlewaretoken', None)
             form = PortfolioCreateForm(data=data)
             portfolio = Portfolio.objects.get(
-                slug=kwargs.get('slug')
+                slug=request.data.get('slug')
             )
             if not form.is_valid():
                 errors = form.errors.get_json_data()
@@ -91,7 +91,7 @@ class PortfolioAPIView(
                         status=400,
                     )
             Portfolio.objects.filter(
-                slug=kwargs.get('slug')
+                slug=request.data.get('slug')
             ).update(
                 name=request.data.get('name').strip(),
                 slug=request.data.get('name').strip().lower().replace(' ', '_'),
@@ -154,7 +154,7 @@ class PortfolioAPIView(
     def delete(self, request, *args, **kwargs):
         if request.is_ajax():
             Portfolio.objects.get(
-                slug=kwargs.get('slug')
+                slug=request.data.get('slug')
             ).delete()
             return Response(
                 data={},

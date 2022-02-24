@@ -1,0 +1,15 @@
+<a href="{% url 'strategy_detail' slug=strategy.slug %}">
+    <div class="strategy_list_strategy" id="{{ strategy.slug }}">
+        <ul>
+            <li class="strategy_list_strategy_name">
+                {{ strategy.name }}
+            </li>
+            <li class="strategy_list_strategy_long_limit">
+                {{ strategy.long_limit }}
+            </li>
+            <li class="strategy_list_strategy_short_limit">
+                {{ strategy.short_limit }}
+            </li>
+        </ul>
+    </div>
+</a>

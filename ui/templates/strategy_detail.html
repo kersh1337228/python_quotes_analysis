@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load uitags %}
+
+{% block title %}{{ strategy.name }}{% endblock %}
+
+{% block content %}
+    <div class="strategy_detail">
+        <span class="config_button" id="strategy_config_button">Configure</span>
+        <span class="delete_button" id="strategy_delete_button">Delete</span>
+        <h1 class="strategy_detail_name">
+            {{ strategy.name }}
+        </h1>
+        <div class="strategy_detail_long_limit">
+            Long limit: {{ strategy.long_limit }}
+        </div>
+        <div class="strategy_detail_short_limit">
+            Short limit: {{ strategy.short_limit }}
+        </div>
+        <div class="strategy_detail_results">
+            <h3>Results</h3>
+            {% if strategy.get_results %}
+                <table>
+                    <tr>
+                        <td></td>
+                        <td class="result_amount">Amount</td>
+                        <td class="result_percent">Percent</td>
+                    </tr>
+                    <tr>
+                        <td class="result_type" style="color: rgb(92, 171, 50);">
+                            Success
+                        </td>
+                        <td class="result_amount">
+                            {{ strategy.get_results.success.amount }}
+                        </td>
+                        <td class="result_percent">
+                            {{ strategy.get_results.success.percent }} %
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="result_type" style="color: rgb(250, 92, 92);">
+                            Fail
+                        </td>
+                        <td class="result_amount">
+                            {{ strategy.get_results.fail.amount }}
+                        </td>
+                        <td class="result_percent">
+                            {{ strategy.get_results.fail.percent }} %
+                        </td>
+                    </tr>
+                </table>
+            {% else %}
+                No results yet.
+            {% endif %}
+        </div>
+        <div class="strategy_detail_logs">
+            <h3 id="strategy_detail_logs_button">Logs <div>▼<div></div></h3>
+            {% if logs %}
+                {% for log in logs %}
+                    {% log_tag log=log %}
+                {% endfor %}
+            {% else %}
+                <span>No logs yet.</span>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

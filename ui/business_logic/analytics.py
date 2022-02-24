@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 import datetime
 import numpy
@@ -13,8 +14,8 @@ from ui.models import Log, Image
 '''Copies the portfolio and share to allow the analyser
  function to change the data of the class 
  instance but not of the database'''
-class Portfolio_Image:
-    class Share_Image:
+class PortfolioImage:
+    class ShareImage:
         def __init__(self, share):
             self.origin = share.origin
             self.amount = 0
@@ -22,10 +23,12 @@ class Portfolio_Image:
     def __init__(self, portfolio):
         self.balance = portfolio.balance
         self.shares = [
-            self.Share_Image(share) for share in portfolio.shares.all()
+            self.ShareImage(share) for share in portfolio.shares.all()
         ]
         self.cost = self.balance
 
+    # Balance in currency + shares price
+    # according to its close price by the date
     def set_cost(self, date):
         cost = self.balance
         for share in self.shares:
@@ -55,64 +58,59 @@ def analyse(portfolio, time_interval_start, time_interval_end, strategy):
             time_interval_end,
             '%Y-%m-%d'
         ) - datetime.timedelta(days=3),
-    ) # Converting dates to date range
+    )  # Converting dates to date range
     logs = log(
-        Portfolio_Image(portfolio),
+        PortfolioImage(portfolio),
         date_range,
         strategy,
-    ) # Analysing and logging
+    )  # Analysing and logging
     log_instance = Log.objects.create(
         time_interval_start=time_interval_start,
         time_interval_end=time_interval_end,
         price_deltas={
             'balance': {
-                'percent': (logs[-1].cost / logs[0].cost - 1) * 100,
+                'percent': round(logs[-1].cost / logs[0].cost - 1, 2) * 100,
                 'currency': round(logs[-1].cost - logs[0].cost, 2)
             },
             'shares': [
                 {
-                    'percent': (share.origin.quotes[time_interval_start]['close'] /
-                                share.origin.quotes[time_interval_end]['close'] - 1) * 100,
+                    'percent': round(share.origin.quotes[time_interval_end]['close'] /
+                                share.origin.quotes[time_interval_start]['close'] - 1, 2) * 100,
                     'currency': round(
-                        share.origin.quotes[time_interval_start]['close'] -
-                        share.origin.quotes[time_interval_end]['close'], 2
+                        share.origin.quotes[time_interval_end]['close'] -
+                        share.origin.quotes[time_interval_start]['close'], 2
                     )
                 }
                 for share in portfolio.shares.all()]
         },
         strategy=strategy,
         portfolio=portfolio,
-    ) # Creating log model instance to save analysis data
+    )  # Creating log model instance to save analysis data
     plot_builder(
         portfolio,
         date_range,
         logs,
-    ) # Building balance change plot
+    )  # Building balance change plot
     log_instance.balance_plot.save(
         'balance.png',
         File(open('ui/business_logic/balance.png', 'rb'))
-    ) # Attaching balance change plot to log model instance
+    )  # Attaching balance change plot to log model instance
+    # Deleting unnecessary plot picture
+    os.remove('ui/business_logic/balance.png')
+    # Building share price ohlc candle plot
     for share in portfolio.shares.all():
-        build_candle_plot( # Building share price ohlc candle plot
-            {date: share.origin.quotes[date] for date in get_date_range(
-                share.origin.quotes, time_interval_start, time_interval_end
-            )},
+        build_candle_plot(
+            {date: share.origin.quotes[date] for date in date_range},
             f'{share.origin.name}.png'
-        ) # Attaching share price plot to log model instance
+        )  # Attaching share price plot to log model instance
         image = Image.objects.create()
         image.attach_image(f'{share.origin.name}.png')
         log_instance.share_plots.add(image)
-    log_instance.save() # Applying log model instance changes
-    portfolio.logs.add(log_instance) # Attaching log to the portfolio
+        os.remove(f'ui/business_logic/{share.origin.name}.png')
+    log_instance.save()  # Applying log model instance changes
+    portfolio.logs.add(log_instance)  # Attaching log to the portfolio
     portfolio.save()
     return log_instance
-
-
-def get_date_range(quotes, time_interval_start, time_interval_end):
-    return [date for date in quotes.keys() if datetime.datetime.strptime(date, '%Y-%m-%d') >=
-            datetime.datetime.strptime(time_interval_start, '%Y-%m-%d') and
-            datetime.datetime.strptime(date, '%Y-%m-%d') <=
-            datetime.datetime.strptime(time_interval_end, '%Y-%m-%d')]
 
 
 '''Log function uses the strategy to analyse
@@ -124,7 +122,6 @@ def log(portfolio_image, date_range, strategy):
     for date in date_range:
         for index in range(len(portfolio_image.shares)):
             portfolio_image = strategy.buy_or_sell(portfolio_image, index, date)
-            print(portfolio_image)
         logs.append(deepcopy(portfolio_image))
     return logs
 
@@ -140,9 +137,9 @@ def plot_builder(portfolio, date_range, logs):
     fig = plt.figure()
     gridspec = grd.GridSpec(
         nrows=2, ncols=1, height_ratios=[3, 1], hspace=0
-    ) # Building subplot grid
-    balance_subplot = plt.subplot(gridspec[0]) # Balance subplot
-    shares_amount_subplot = plt.subplot(gridspec[1]) # Shares amount subplot
+    )  # Building subplot grid
+    balance_subplot = plt.subplot(gridspec[0])  # Balance subplot
+    shares_amount_subplot = plt.subplot(gridspec[1])  # Shares amount subplot
     # Setting x-axis date format
     shares_amount_subplot.xaxis.set_major_formatter(
         mdates.DateFormatter('%Y-%m-%d')
@@ -177,7 +174,7 @@ def plot_builder(portfolio, date_range, logs):
         facecolor='#161a1e',
         edgecolor='#161a1e',
         framealpha=1
-    ) # Customising legend text color
+    )  # Customising legend text color
     for text in leg.get_texts():
         text.set_color('#838d9b')
     # Deleting unnecessary borders
@@ -212,19 +209,21 @@ def plot_builder(portfolio, date_range, logs):
     shares_amount_subplot.yaxis.label.set_color('#838d9b')
     # Increasing bottom space below the plots
     plt.subplots_adjust(bottom=0.2)
-    plt.savefig(f'ui/business_logic/balance.png', dpi=1200)
+    plt.savefig('ui/business_logic/balance.png', dpi=1200)
     plt.close()
 
 
 '''Building quotes ohlc candle plot'''
 def build_candle_plot(quotes, filename='plot.png'):
     # Formatting data
+    quotes = {date: quote for date, quote in quotes.items()
+              if not quote['non-trading']}
     data = pandas.DataFrame({
-        'Open': [value['open'] for value in list(quotes.values())[::-1]],
-        'High': [value['high'] for value in list(quotes.values())[::-1]],
-        'Low': [value['low'] for value in list(quotes.values())[::-1]],
-        'Close': [value['close'] for value in list(quotes.values())[::-1]],
-        'Volume': [value['volume'] for value in list(quotes.values())[::-1]],
+        'Open': [value['open'] for value in quotes.values()],
+        'High': [value['high'] for value in quotes.values()],
+        'Low': [value['low'] for value in quotes.values()],
+        'Close': [value['close'] for value in quotes.values()],
+        'Volume': [value['volume'] for value in quotes.values()],
     }, index=pandas.DatetimeIndex(quotes.keys()))
     # Creating and customising plot
     plot, axes = mplfinance.plot(
@@ -240,7 +239,9 @@ def build_candle_plot(quotes, filename='plot.png'):
         ),
         volume=True, returnfig=True
     )
-    for axe in axes: # Changing axes colors
+    for axe in axes:  # Changing axes colors
         axe.tick_params(labelcolor='#838d9b')
         axe.set_ylabel(axe.get_ylabel(), color='#838d9b')
     plot.savefig(f'ui/business_logic/{filename}', dpi=1200)
+    # Deleting unnecessary plot picture
+    os.remove(f'ui/business_logic/{filename}')

@@ -5,7 +5,7 @@ from django.views.generic import CreateView, DetailView, ListView, DeleteView
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.response import Response
 from .business_logic.analytics import analyse
-from .forms import CreateStrategyForm, UserInterface
+from .forms import CreateStrategyForm
 from .models import Strategy, Log
 from quotes.models import Portfolio
 
@@ -48,9 +48,9 @@ class AnalysisAPIView(
                 )
         else:
             return render(
-                request, 'main.html',
+                request, 'analysis.html',
                 {'title': 'Analytics',
-                 'form': UserInterface}
+                 'portfolios': Portfolio.objects.all()}
             )
 
     # Getting form data and analysing them
@@ -129,69 +129,64 @@ class LogListAPIView(ListAPIView):
             )
 
 
-'''Creating your own set up strategy,
-creates a new object in database'''
-class CreateStrategyView(CreateView):
-    form_class = CreateStrategyForm
-    template_name = 'create_strategy.html'
-    success_url = reverse_lazy('strategies')
-    model = Strategy
-    extra_context = {'title': 'Create Strategy'}
+class StrategyAPIView(
+    RetrieveUpdateDestroyAPIView,
+    CreateAPIView
+):
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            pass
+        else:
+            return render(
+                template_name='strategy_detail.html',
+                context={
+                    'strategy': Strategy.objects.get(
+                        slug=kwargs.get('slug')
+                    ),
+                    'logs': Log.objects.filter(
+                        strategy__slug=kwargs.get('slug')
+                    )
+                },
+                request=request
+            )
+
+    def post(self, request, *args, **kwargs):
+        if request.is_ajax():
+            pass
+        else:
+            pass
+
+    def patch(self, request, *args, **kwargs):
+        if request.is_ajax():
+            pass
+        else:
+            pass
+
+    def put(self, request, *args, **kwargs):
+        if request.is_ajax():
+            pass
+        else:
+            pass
+
+    def delete(self, request, *args, **kwargs):
+        if request.is_ajax():
+            pass
+        else:
+            pass
 
 
-'''All strategies list on one single page,
-allowing also to view any of it more detailed'''
-class ListOfStrategiesView(ListView):
-    model = Strategy
-    template_name = 'strategies.html'
-    context_object_name = 'strategies'
-    extra_context = {'title': 'Strategies'}
-
-    '''Gets the list of all strategies ordered by certain parameter'''
-    def get_queryset(self):
-        queryset = Strategy.objects.all()
-        if self.kwargs.get('sortby'):
-            sort = self.kwargs.get('sortby')
-            if sort == 'name':
-                queryset = Strategy.objects.order_by('name')
-            elif 'efficiency' in sort:
-                bad = []
-                normal = []
-                good = []
-                for strategy in queryset:
-                    verdict = strategy.get_efficiency().get('verdict')
-                    if verdict == 'bad':
-                        bad.append(strategy)
-                    elif verdict == 'normal':
-                        normal.append(strategy)
-                    else:
-                        good.append(strategy)
-                if sort == 'efficiency_gtb':
-                    bad.extend(normal)
-                    bad.extend(good)
-                    return bad
-                else:
-                    good.extend(normal)
-                    good.extend(bad)
-                    return good
-        return queryset
-
-
-'''Single strategy detailed analytics and information'''
-class SingleStrategyView(DetailView):
-    model = Strategy
-    template_name = 'strategy.html'
-    context_object_name = 'strategy'
-    slug_url_kwarg = 'slug'
-
-
-'''Delete certain strategy'''
-class DeleteStrategyView(DeleteView):
-    model = Strategy
-    template_name = 'delete_strategy.html'
-    context_object_name = 'strategy'
-    slug_url_kwarg = 'slug'
-    success_url = reverse_lazy('strategies')
+class StrategyListAPIView(ListAPIView):
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            pass
+        else:
+            return render(
+                template_name='strategy_list.html',
+                context={
+                    'strategies': Strategy.objects.all()
+                },
+                request=request
+            )
 
 
 '''All logs list on one single page.
@@ -209,7 +204,7 @@ class ListOfLogsView(ListView):
 '''Delete certain strategy'''
 class DeleteLogView(DeleteView):
     model = Log
-    template_name = 'delete_log.html'
+    template_name = 'log_delete.html'
     context_object_name = 'log'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('logs')

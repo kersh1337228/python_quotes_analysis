@@ -4,3 +4,5 @@
 /media/
 /static/plots/
 /static/SanFranciscoFont/
+/ui/migrations/
+/quotes/migrations/

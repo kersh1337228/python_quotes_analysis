@@ -1,13 +1,13 @@
 from django.urls import path
-from .views import AnalysisAPIView, CreateStrategyView, ListOfStrategiesView,\
-    SingleStrategyView, DeleteStrategyView, ListOfLogsView, LogAPIView
+from .views import AnalysisAPIView, ListOfLogsView, LogAPIView,\
+    StrategyListAPIView, StrategyAPIView
 
 
 urlpatterns = [
     path(
         'analysis/',
         AnalysisAPIView.as_view(),
-        name='main'
+        name='analysis'
     ),
     path(
         'analysis/form/',
@@ -15,29 +15,29 @@ urlpatterns = [
         name='get_form'
     ),
     path(
-        'strategies/create/',
-        CreateStrategyView.as_view(),
-        name='create_strategy'
+        'strategy/list/',
+        StrategyListAPIView.as_view(),
+        name='strategy_list'
     ),
     path(
-        'strategies/',
-        ListOfStrategiesView.as_view(),
-        name='strategies'
+        'strategy/create/',
+        StrategyAPIView.as_view(),
+        name='strategy_create'
     ),
     path(
-        'strategies/sortby/<slug:sortby>',
-        ListOfStrategiesView.as_view(),
-        name='strategies_sortby'
+        'strategy/detail/<slug:slug>',
+        StrategyAPIView.as_view(),
+        name='strategy_detail'
     ),
     path(
-        'strategies/<slug:slug>',
-        SingleStrategyView.as_view(),
-        name='strategy'
+        'strategy/update/',
+        StrategyAPIView.as_view(),
+        name='strategy_update'
     ),
     path(
-        'strategies/delete/<slug:slug>',
-        DeleteStrategyView.as_view(),
-        name='delete_strategy'
+        'strategy/delete/',
+        StrategyAPIView.as_view(),
+        name='strategy_delete'
     ),
     path(
         'logs/list/',

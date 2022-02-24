@@ -1,0 +1,33 @@
+<div class="log_detail">
+    <h4 class="log_header">{{ log.strategy.name }} strategy on {{ log.portfolio.name }}
+        portfolio for [{{ log.time_interval_start|date:"d/m/Y" }}
+        - {{ log.time_interval_end|date:"d/m/Y" }}]</h4>
+    <h4>Total price change</h4>
+    <table>
+        <tr>
+            <td class="delta_name">Balance</td>
+            <td class="delta_currency">{{ log.price_deltas.balance.currency }} $</td>
+            <td class="delta_percent">{{ log.price_deltas.balance.percent }} %</td>
+        </tr>
+            {% for share in log.portfolio.shares.all %}
+                <tr>
+                    <td class="delta_name">{{ share.origin.name }}</td>
+                    {% for share_delta in log.price_deltas.shares %}
+                        {% if forloop.counter == forloop.parentloop.counter %}
+                            <td class="delta_currency">{{ share_delta.currency }} $</td>
+                            <td class="delta_percent">{{ share_delta.percent }} %</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+    </table>
+{#    <img src="{{ log.balance_plot.url }}" alt="" height="400px" width="600px">#}
+{#    {% for plot in log.share_plots.all %}#}
+{#        {% for share in log.portfolio.shares.all %}#}
+{#            {% if forloop.counter == forloop.parentloop.counter %}#}
+{#                <h2>{{ share.origin.name }}</h2>#}
+{#            {% endif %}#}
+{#        {% endfor %}#}
+{#        <img src="{{ plot.image.url }}" alt="" height="400px" width="600px">#}
+{#    {% endfor %}#}
+</div>

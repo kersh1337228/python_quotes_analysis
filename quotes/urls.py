@@ -19,19 +19,19 @@ urlpatterns = [
         name='portfolio_detail'
     ),
     path(
-        'portfolio/update/<slug:slug>',
+        'portfolio/update/',
         PortfolioAPIView.as_view(),
         name='portfolio_update'
+    ),
+    path(
+        'portfolio/delete/',
+        PortfolioAPIView.as_view(),
+        name='portfolio_delete'
     ),
     path(
         'portfolio/share/',
         PortfolioAPIView.as_view(),
         name='portfolio_share'
-    ),
-    path(
-        'portfolio/delete/<slug:slug>',
-        PortfolioAPIView.as_view(),
-        name='portfolio_delete'
     ),
     path(
         'list/',

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load uitags %}
+
+{% block title %}Strategies{% endblock %}
+
+{% block content %}
+    <div class="content_strategy_list">
+        <div class="button_div" id="add_strategy_button">
+            <div>Add strategy</div><div>+</div>
+        </div>
+        <div class="strategy_list">
+            {% if strategies %}
+                <div class="strategy_list_header">
+                    <ul>
+                        <li class="strategy_list_strategy_name">
+                            Name
+                        </li>
+                        <li class="strategy_list_strategy_long_limit">
+                            Long limit
+                        </li>
+                        <li class="strategy_list_strategy_short_limit">
+                            Short limit
+                        </li>
+                    </ul>
+                </div>
+                {% for strategy in strategies %}
+                    {% strategy_tag strategy=strategy %}
+                {% endfor %}
+            {% else %}
+                <span>No strategies yet.</span>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

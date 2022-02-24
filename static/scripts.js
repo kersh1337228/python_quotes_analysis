@@ -3,6 +3,31 @@ $(document).ready(function () {
     function get_csrf () {
         return document.cookie.match(/csrftoken=([\w]+)[;]?/)[1]
     }
+    // Navigation bar tab selection
+    function nav_bar_selection() {
+        const app_name = window.location.href.match(
+            `^${window.location.origin}\/([\\w]+)\/`
+        )[1]
+        console.log(app_name)
+        let tab_name = ''
+        if (app_name === 'analysis') {
+            tab_name = 'Analysis'
+        } else if (app_name === 'quotes') {
+            tab_name = 'Quotes'
+        } else if (app_name === 'portfolio') {
+            tab_name = 'Portfolios'
+        } else if (app_name === 'strategy') {
+            tab_name = 'Strategies'
+        } else if (app_name === 'logs') {
+            tab_name = 'Logs'
+        }
+        $(`.navigation_bar ul li a:contains("${tab_name}")`).css(
+            'color',
+            'rgb(255, 154, 11)'
+        )
+    }
+    nav_bar_selection()
+    // Quotes search by symbol or name
     $('.content').on('input paste', '#id_share_name', function () {
         search_input = $(this)
         $.ajax({
@@ -33,7 +58,7 @@ $(document).ready(function () {
             }
         })
     })
-
+    // Show portfolio create form
     $('#portfolio_add_button').on('click', function (){
         form = $(this).parent().children('.portfolio_create_form')
         if (form.css('display') === 'none') {
@@ -42,11 +67,11 @@ $(document).ready(function () {
             form.hide(300)
         }
     })
-
+    // Submit form by clicking on div
     $('.content').on('click', '.submit_button', function () {
         $(this).parent().trigger('submit')
     })
-
+    // Submitting portfolio create form
     $('.content').on('submit', '.portfolio_create_form form', function (event) {
         event.preventDefault()
         let data = new FormData($(this)[0])
@@ -168,19 +193,15 @@ $(document).ready(function () {
             })
         }
     })
-    /*Sort submenu realization*/
-    $('#sort').on('click', function () {
-        sub_menu = $('.sub_menu')
-        if (sub_menu.css('visibility') === 'visible') {
-            $(this).text('Sort by ▼')
-            sub_menu.css('visibility', 'hidden');
-            sub_menu.css('opacity', '0');
-            sub_menu.css('transform', 'translate(0, 20px)');
+    // Logs list drop down list
+    $('.content').on('click', '#strategy_detail_logs_button', function() {
+        if ($('.log_detail').css('display') === 'none') {
+            $(this).children('div').css('transform', 'rotate(-180deg)')
+            $('.log_detail').show(300)
+            $('.log_detail').css('display', 'grid')
         } else {
-            $(this).text('Sort by ▲')
-            sub_menu.css('visibility', 'visible');
-            sub_menu.css('opacity', '1');
-            sub_menu.css('transform', 'translate(0, 0)');
+            $(this).children('div').css('transform', 'rotate(0deg)')
+            $('.log_detail').hide(300)
         }
     })
     // Quote click

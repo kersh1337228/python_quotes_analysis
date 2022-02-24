@@ -88,6 +88,10 @@ option {
     display: inline;
 }
 
+.nav_bar_tab_selected {
+    color: rgb(255, 154, 11);
+}
+
 .content {
     display: flex;
     position: absolute;
@@ -367,19 +371,33 @@ option {
 }
 
 .config_button {
-    width: 400px;
+    grid-row-start: 1;
+    grid-row-end: 1;
+    grid-column-start: 2;
+    grid-column-end: 2;
+    justify-self: end;
+    text-align: end;
+    max-width: max-content;
     text-align: end;
     cursor: pointer;
     transition: color 0.3s;
 }
 
-#portfolio_delete {
-    color: rgb(171, 92, 92);
+.delete_button {
+    grid-row-start: 2;
+    grid-row-end: 2;
+    grid-column-start: 2;
+    grid-column-end: 2;
+    justify-self: end;
+    max-width: max-content;
+    text-align: end;
+    cursor: pointer;
+    color: rgb(250, 92, 92);
     transition: color 0.3s;
 }
 
-#portfolio_delete:hover {
-    color: rgb(250, 92, 92);
+.delete_button:hover {
+    color: rgb(171, 92, 92);
 }
 
 .config_button:hover {
@@ -603,34 +621,174 @@ option {
     background: rgb(0, 0, 0);
 }
 
-.list_data {
-    display: block;
-    margin-top: 30px;
+/*Strategy list style*/
+/*_____________________________________________________________________*/
+.content_strategy_list {
+    width: 400px;
+    display: grid;
+    gap: 10px 0;
+    background: rgb(50, 50, 50);
+    padding: 15px 15px 15px 15px;
+    border-radius: 10px;
+    box-sizing: border-box;
 }
 
-.percent_table {
-    margin-top: 20px;
-    border: 1px solid white;
-    border-collapse: collapse;
+#add_strategy_button {
+    padding: 15px 15px 15px 15px;
+    color: rgb(92, 171, 50);
+}
+
+.strategy_list {
+    display: grid;
+    gap: 10px 0;
     width: 100%;
+    background: rgb(30, 30, 30);
+    border-radius: 10px;
+    padding: 15px 15px 15px 15px;
+    box-sizing: border-box;
 }
 
-.percent_table tr, td {
-    padding: 3px;
-    border: 1px solid white;
+.strategy_list_header {
+    padding: 10px 10px 10px 10px;
+    border-radius: 10px;
 }
 
-.good {
-    color: rgb(16, 120, 0);
+.strategy_list_strategy {
+    background: rgb(40, 40, 40);
+    padding: 10px 10px 10px 10px;
+    border-radius: 10px;
+    transition: background 0.3s;
 }
 
-.normal {
-    color: rgb(171, 136, 0);
+.strategy_list_strategy:hover {
+    background: rgb(20, 20, 20);
 }
 
-.bad {
-    color: rgb(135, 0, 0);
+.strategy_list_strategy ul, .strategy_list_header ul {
+    display: grid;
+    justify-content: space-between;
+    grid-template-columns: 1fr 1fr 1fr;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    row-gap: 10px;
 }
+
+.strategy_list_strategy_name {
+    justify-self: start;
+}
+
+.strategy_list_strategy_long_limit {
+    justify-self: end;
+}
+
+.strategy_list_strategy_short_limit {
+    justify-self: end;
+}
+
+
+/*Strategy detail style*/
+/*_____________________________________________________________________*/
+
+.strategy_detail {
+    display: grid;
+    gap: 10px 10px;
+    width: 400px;
+}
+
+.strategy_detail_name {
+    grid-column-start: 1;
+    grid-column-end: 1;
+    grid-row-start: 3;
+    grid-row-end: 5;
+    align-self: start;
+}
+
+.strategy_detail_long_limit {
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 3;
+    grid-row-end: 3;
+    font-weight: lighter;
+    justify-self: end;
+}
+
+.strategy_detail_short_limit {
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 4;
+    grid-row-end: 4;
+    font-weight: lighter;
+    justify-self: end;
+}
+
+.strategy_detail_results {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: 5;
+    grid-row-end: 5;
+}
+
+.strategy_detail_results table {
+    width: 100%;
+    border-collapse: separate;
+    border: none;
+    gap: 10px 10px;
+}
+
+.strategy_detail_results table .result_type {
+    text-align: start;
+}
+
+.strategy_detail_results table .result_amount, .result_percent {
+    text-align: end;
+}
+
+.strategy_detail_logs {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: 6;
+    grid-row-end: 6;
+    display: grid;
+    gap: 20px 0;
+}
+
+#strategy_detail_logs_button {
+    display: flex;
+    flex-direction: row;
+    max-width: max-content;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+#strategy_detail_logs_button div {
+    transition: transform 0.3s;
+}
+
+#strategy_detail_logs_button:hover {
+    color: rgb(100, 100, 100);
+}
+
+/*Log detail style*/
+/*_____________________________________________________________________*/
+
+.log_detail {
+    display: none;
+    background: rgb(40, 40, 40);
+    border-radius: 10px;
+    padding: 15px 15px 15px 15px;
+    gap: 10px 0;
+}
+
+.log_detail table .delta_name {
+    text-align: start;
+}
+
+.log_detail table .delta_currency, .delta_percent {
+    text-align: end;
+}
+
+/*Other stuff*/
+/*_____________________________________________________________________*/
 
 .analytics {
     display: flex;
@@ -672,8 +830,4 @@ option {
 
 .create_form {
     margin-top: 70px;
-}
-
-.current_page {
-    color: rgb(255, 154, 11);
 }
